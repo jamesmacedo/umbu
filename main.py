@@ -1,6 +1,8 @@
 import json
+import yaml
 import constants
 from models.transcription import Transcription
+from models.company import Company
 from models.text import TextModel, TextState
 from ui.layout import Layout
 from ui.text import Text, Row
@@ -25,17 +27,33 @@ with open('transcription.json', 'r') as f:
     transcription = [Transcription(**d) for d in data]
 
 
+def getCompany(company_id: str):
+    with open('companies.yaml') as file:
+        try:
+            data = yaml.safe_load(file)['companies'][company_id]
+        except yaml.YAMLError as e:
+            print(e)
+    company = Company(**data)
+    return company
+
+
+company = getCompany("guild")
+
 layout = Layout(WIDTH, HEIGHT)
-layout.create()
+layout.create(company)
 
 text = Text(layout)
-text.setFont("BadaBoom BB", constants.FONT_SIZE)
+text.setFont(company.font, constants.FONT_SIZE)
 
 testing = [TextState.COMPLETED, TextState.ACTIVATED, TextState.UNACTIVATED]
 
+
 for chunk in chunk_array(transcription, chunk_size):
     x = 0
-    row = Row([TextModel(text=transcription.word, state=TextState.UNACTIVATED if i >= len(testing) else testing[i]) for i, transcription in enumerate(chunk)], text)
+    row = Row([TextModel(
+                text=transcription.word,
+                state=TextState.UNACTIVATED if i >= len(testing) else testing[i]) for i, transcription in enumerate(chunk)],
+                text)
     row.draw((layout.width - row.shape.width)/2, (layout.height * constants.VERTICAL_ALIGN) - row.height/2)
     break
 

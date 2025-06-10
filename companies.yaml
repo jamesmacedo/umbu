@@ -1,0 +1,10 @@
+
+companies:
+  guild:
+    id: "guild"
+    font: "Montserrat"
+    class_name: "GuildStyle"
+    colors:
+      primary:    "#262A82"
+      secondary:  "#F9C606"
+      accent:     "#E2E3FF"

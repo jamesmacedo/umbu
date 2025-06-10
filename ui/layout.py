@@ -1,5 +1,6 @@
 import gi
 import cairo
+from models.company import Company
 from gi.repository import Pango, PangoCairo, PangoFT2
 
 gi.require_version("Pango", "1.0")
@@ -11,11 +12,13 @@ class Context:
     surface = None
     context = None
     layout = None
+    company: Company = None
 
-    def __init__(self, surface, context, layout):
+    def __init__(self, surface, context, layout, company):
         self.surface = surface
         self.context = context
         self.layout = layout
+        self.company = company
 
 
 class Layout:
@@ -27,7 +30,7 @@ class Layout:
         self.width = width
         self.height = height
 
-    def create(self):
+    def create(self, company: Company):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.width, self.height)
         ctx = cairo.Context(surface)
 
@@ -37,7 +40,7 @@ class Layout:
         fontmap = PangoCairo.FontMap.set_default(fontmap)
         fontmap = PangoFT2.FontMap.new()
 
-        self.context = Context(surface, ctx, layout)
+        self.context = Context(surface, ctx, layout, company)
 
     def save(self, name: str):
         self.context.surface.write_to_png(name)

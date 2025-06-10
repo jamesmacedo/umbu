@@ -1,16 +1,21 @@
 import constants
 import numpy as np
+
+from typing import List
 from ui.layout import Layout
+
+from ui.style.mortgage import GuildStyle
+
+
 from gi.repository import Pango, PangoCairo
 from models.text import TextModel, TextState
-from typing import List
 
 
 class Shape:
-    x: int = 0
-    y: int = 0
-    width: int = 0
-    height: int = 0
+    x: float = 0
+    y: float = 0
+    width: float = 0
+    height: float = 0
 
     def __init__(self, x, y, width, height):
         self.x = x
@@ -25,12 +30,12 @@ class Row(Shape):
     text_arr: List[TextModel] = []
     temp_layout: Layout
 
-    def __init__(self, text_arr: str, text):
+    def __init__(self, text_arr: List[TextModel], text):
         self.text_arr = text_arr
         self.text = text
         self.temp_layout = Layout(720, 1280)
 
-        self.temp_layout.create()
+        self.temp_layout.create(None)
 
         self.shape = Shape(0, 0, 0, 0)
         width_arr, height_arr = [], []
@@ -47,7 +52,7 @@ class Row(Shape):
 
         self.shape = Shape(0, 0, np.sum(width_arr) + (constants.TEXT_PADDING * (len(width_arr) - 1)), np.max(height_arr))
 
-    def draw(self, x: int, y: int):
+    def draw(self, x: float, y: float):
         for i, text in enumerate(self.text_arr):
             self.text.setText(text)
             self.text.draw(x, y)
@@ -56,33 +61,27 @@ class Row(Shape):
 
 class Text(Shape):
 
+    text: TextModel
     shape: Shape = Shape(0, 0, 0, 0)
-
-    def _define_font(self):
-        pass
 
     def __init__(self, layout: Layout):
         self.layout = layout
 
-    def setFont(self, font: str = "BadaBoom BB", size: int = 10):
-        font_description = Pango.font_description_from_string(f"{font} {size}")
-        self.layout.context.layout.set_font_description(font_description)
+    def setFont(self, font: str = "", size: int = 10):
+        desc = Pango.FontDescription()
+        desc.set_family(font)
+        desc.set_size(size * Pango.SCALE)
+        desc.set_weight(Pango.Weight.BOLD)
+        self.layout.context.layout.set_font_description(desc)
 
     def setText(self, text: TextModel):
+        self.text = text
         self.layout.context.layout.set_text(text.text, -1)
-
-        if text.state is TextState.COMPLETED:
-            self.layout.context.context.set_source_rgb(1, 1, 1)
-        elif text.state is TextState.ACTIVATED:
-            self.layout.context.context.set_source_rgb(1, 0, 0)
-        elif text.state is TextState.UNACTIVATED:
-            self.layout.context.context.set_source_rgb(1, 0, 0)
-            self.layout.context.context.set_line_width(2)
-            self.layout.context.context.set_source_rgba(0, 0, 0, 1)
 
         ink_rect, logical_rect = self.layout.context.layout.get_pixel_extents()
         self.shape = Shape(0, 0, logical_rect.width, logical_rect.height)
 
     def draw(self, x: int, y: int):
-        self.layout.context.context.move_to(x, y)
-        PangoCairo.show_layout(self.layout.context.context, self.layout.context.layout)
+        data = (x, y, self.layout, self.text)
+        classe = globals()[self.layout.context.company.class_name]()
+        getattr(classe, "draw3")(*data)
