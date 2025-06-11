@@ -2,13 +2,13 @@ import constants
 import numpy as np
 
 from typing import List
-from ui.layout import Layout
+from core.ui.layout import Layout
 
-from ui.style.mortgage import GuildStyle
+from core.ui.style.mortgage import GuildStyle
 
 
 from gi.repository import Pango, PangoCairo
-from models.text import TextModel, TextState
+from core.models.text import TextModel, TextState
 
 
 class Shape:

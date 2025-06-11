@@ -1,11 +1,13 @@
 import json
 import yaml
+import math
 import constants
-from models.transcription import Transcription
-from models.company import Company
-from models.text import TextModel, TextState
-from ui.layout import Layout
-from ui.text import Text, Row
+
+from core.models.transcription import Transcription
+from core.models.company import Company
+from core.models.text import TextModel, TextState
+from core.ui.layout import Layout
+from core.ui.text import Text, Row
 from typing import List
 
 
@@ -45,16 +47,22 @@ layout.create(company)
 text = Text(layout)
 text.setFont(company.font, constants.FONT_SIZE)
 
-testing = [TextState.COMPLETED, TextState.ACTIVATED, TextState.UNACTIVATED]
+final = transcription[-1].end
 
-
-for chunk in chunk_array(transcription, chunk_size):
-    x = 0
-    row = Row([TextModel(
-                text=transcription.word,
-                state=TextState.UNACTIVATED if i >= len(testing) else testing[i]) for i, transcription in enumerate(chunk)],
-                text)
-    row.draw((layout.width - row.shape.width)/2, (layout.height * constants.VERTICAL_ALIGN) - row.height/2)
-    break
-
-layout.save("frames/frame.png")
+# async def animate():
+#     cursor = 0
+#     x = 0
+#     for chunk in chunk_array(transcription, chunk_size):
+#
+#         for tra in chunk:
+#             frames = (tra.end - tra.start)*constants.FPS
+#             cursor += math.ceil(frames)
+#         break
+#
+# while(True):
+#     row = Row([TextModel(
+#                 text=transcription.word,
+#                 state=TextState.UNACTIVATED) for i, transcription in enumerate(chunk)],
+#                 text)
+#     row.draw((layout.width - row.shape.width)/2, (layout.height * constants.VERTICAL_ALIGN) - row.height/2)
+#     layout.save("frames/frame.png")

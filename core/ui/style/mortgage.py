@@ -1,6 +1,6 @@
 from gi.repository import PangoCairo
-from models.text import TextModel, TextState
-from ui.style.base import StyleBase
+from core.models.text import TextModel, TextState
+from core.ui.style.base import StyleBase
 
 
 class GuildStyle(StyleBase):

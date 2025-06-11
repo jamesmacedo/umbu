@@ -1,6 +1,6 @@
 import gi
 import cairo
-from models.company import Company
+from core.models.company import Company
 from gi.repository import Pango, PangoCairo, PangoFT2
 
 gi.require_version("Pango", "1.0")
