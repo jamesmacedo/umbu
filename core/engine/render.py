@@ -1,6 +1,5 @@
 import constants
 
-from core.models.text import TextModel, TextState, ShapeModel
 from core.ui.text import Row
 
 

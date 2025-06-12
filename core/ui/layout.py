@@ -3,7 +3,6 @@ import cairo
 import constants
 
 from core.ui.text import Row
-from core.models.company import Company
 from core.models.layout import LayoutState
 from gi.repository import Pango, PangoCairo, PangoFT2
 
@@ -16,13 +15,11 @@ class Context:
     surface = None
     context = None
     layout = None
-    company: Company = None
 
-    def __init__(self, surface, context, layout, company):
+    def __init__(self, surface, context, layout):
         self.surface = surface
         self.context = context
         self.layout = layout
-        self.company = company
 
 
 class Layout:
@@ -43,7 +40,7 @@ class Layout:
         desc.set_weight(Pango.Weight.BOLD)
         layout.set_font_description(desc)
 
-    def create(self, company: Company, chunks):
+    def create(self, chunks):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.width, self.height)
         ctx = cairo.Context(surface)
 
@@ -62,9 +59,9 @@ class Layout:
         fontmap = PangoCairo.FontMap.set_default(fontmap)
         fontmap = PangoFT2.FontMap.new()
 
-        self.setFont(layout, company.font, constants.FONT_SIZE)
+        self.setFont(layout, "Montserrant", constants.FONT_SIZE)
 
-        self.context = Context(surface, ctx, layout, company)
+        self.context = Context(surface, ctx, layout)
 
     def save(self, name: str):
         self.context.surface.write_to_png(name)

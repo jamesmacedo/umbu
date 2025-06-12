@@ -1,14 +1,11 @@
 import json
-import yaml
 import math
 import asyncio
 
 from core.ui.layout import Layout
 from core.engine.render import Renderer
 from core.models.transcription import Transcription
-from core.models.text import TextModel, TextState, ShapeModel
-from core.models.company import Company
-from core.models.layout import Item
+from core.models.layout import Word, WordState, Shape
 from typing import List, Any
 
 WIDTH, HEIGHT = 720, 1280
@@ -45,12 +42,18 @@ class Engine:
         self._chunks = c
 
     def load(self, path: str):
-        def create_chunk(arr: List[Any], size: int) -> List[List[Item]]:
-            chunks: List[List[Item]] = []
+        def create_chunk(arr: List[Any], size: int) -> List[List[Word]]:
+            chunks: List[List[Word]] = []
             for i in range(0, len(arr), size):
                 raw_chunk = arr[i:i + size]
                 item_chunk = [
-                    Item(transcription=val, text=TextModel(text=val.word, state=TextState.UNACTIVATED, shape=ShapeModel(x=0, y=0, width=0, height=0)))
+                    Word(
+                        cursor=0,
+                        transcription=val,
+                        content=val.word,
+                        state=WordState.UNACTIVATED,
+                        shape=Shape(x=0, y=0, width=0, height=0)
+                    )
                     for val in raw_chunk
                 ]
                 chunks.append(item_chunk)
@@ -66,9 +69,9 @@ class Engine:
     async def state_loop(self, layout, buffer, event):
         for i, chunk in enumerate(self.chunks):
 
-            for item in chunk:
+            for word in chunk:
                 await asyncio.sleep(0)
-                item.text.state = TextState.ACTIVATED
+                word.state = WordState.ACTIVATED
                 event.set()
             #     text_frames = math.ceil((item.transcription.end-item.transcription.start) * 60)
             #     for frame in range(0, text_frames):
@@ -88,22 +91,11 @@ class Engine:
 
     async def run(self):
 
-        def getCompany(company_id: str):
-            with open('companies.yaml') as file:
-                try:
-                    data = yaml.safe_load(file)['companies'][company_id]
-                except yaml.YAMLError as e:
-                    print(e)
-            company = Company(**data)
-            return company
-
-        company = getCompany("guild")
-
         layout = Layout(WIDTH, HEIGHT)
-        layout.create(company, self.chunks)
+        layout.create(self.chunks)
 
         buffer = Layout(WIDTH, HEIGHT)
-        buffer.create(company, self.chunks)
+        buffer.create(self.chunks)
 
         event = asyncio.Event()
         t1 = asyncio.create_task(self.state_loop(layout, buffer, event))
