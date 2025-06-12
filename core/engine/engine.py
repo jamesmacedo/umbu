@@ -2,7 +2,7 @@ import json
 import math
 import asyncio
 
-from core.ui.layout import Layout
+from core.ui.layout import Layout, Cursor
 from core.engine.render import Renderer
 from core.models.transcription import Transcription
 from core.models.layout import Word, WordState, Shape
@@ -13,7 +13,6 @@ WIDTH, HEIGHT = 720, 1280
 
 class Engine:
     _transcription: List[Transcription] = []
-    _cursor = 0
     _total_frames = 0
 
     layout: Layout | None = None
@@ -48,11 +47,11 @@ class Engine:
                 raw_chunk = arr[i:i + size]
                 item_chunk = [
                     Word(
-                        cursor=0,
+                        cursor=Cursor(),
                         transcription=val,
                         content=val.word,
                         state=WordState.UNACTIVATED,
-                        shape=Shape(x=0, y=0, width=0, height=0)
+                        shape=Shape()
                     )
                     for val in raw_chunk
                 ]
@@ -71,7 +70,7 @@ class Engine:
 
             for word in chunk:
                 await asyncio.sleep(0)
-                word.state = WordState.ACTIVATED
+                # word.state = WordState.ACTIVATED
                 event.set()
             #     text_frames = math.ceil((item.transcription.end-item.transcription.start) * 60)
             #     for frame in range(0, text_frames):
@@ -82,10 +81,10 @@ class Engine:
             await event.wait()
             event.clear()
             Renderer.render(layout, buffer)
-            layout.state.cursor += 1
-            print(f"[draw] cursor = {layout.state.cursor}")
+            layout.state.cursor.position += 1
+            print(f"[draw] cursor = {layout.state.cursor.position}")
 
-            if layout.state.cursor == 4:
+            if layout.state.cursor.position == 4:
                 layout.state.done = True
                 event.set()
 

@@ -4,7 +4,11 @@ from pydantic import BaseModel
 
 from core.models.transcription import Transcription
 
-# class Cursor
+
+class Cursor(BaseModel):
+    x: int = 0
+    y: int = 0
+    position: int = 0
 
 
 class Shape(BaseModel):
@@ -21,7 +25,7 @@ class WordState(IntEnum):
 
 
 class Word(BaseModel):
-    cursor: int
+    cursor: Cursor | None
     transcription: Transcription
     content: str
     state: WordState = WordState.UNACTIVATED
@@ -30,7 +34,7 @@ class Word(BaseModel):
 
 class LayoutState(BaseModel):
     done: bool
-    cursor: int
+    cursor: Cursor | None
     total_frames: int
     current_chunk: List[Word] | None
     chunks: List[List[Word]]

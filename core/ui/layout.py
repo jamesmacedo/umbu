@@ -2,8 +2,7 @@ import gi
 import cairo
 import constants
 
-from core.ui.text import Row
-from core.models.layout import LayoutState
+from core.models.layout import LayoutState, Cursor
 from gi.repository import Pango, PangoCairo, PangoFT2
 
 gi.require_version("Pango", "1.0")
@@ -48,7 +47,7 @@ class Layout:
 
         self.state = LayoutState(
             done=False,
-            cursor=0,
+            cursor=Cursor(**{}),
             total_frames=0,
             current_chunk=chunks[0],
             chunks=chunks,
