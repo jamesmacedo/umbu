@@ -2,15 +2,13 @@ import json
 import yaml
 import math
 import asyncio
-import constants
 
 from core.ui.layout import Layout
-from core.ui.text import Row
 from core.engine.render import Renderer
 from core.models.transcription import Transcription
 from core.models.text import TextModel, TextState, ShapeModel
 from core.models.company import Company
-from core.models.layout import Item, LayoutState
+from core.models.layout import Item
 from typing import List, Any
 
 WIDTH, HEIGHT = 720, 1280
@@ -65,21 +63,30 @@ class Engine:
 
         self._total_frames = math.ceil(self._transcription[-1].end * 60)
 
-    def render(self, layout, buffer):
+    async def state_loop(self, layout, buffer, event):
         for i, chunk in enumerate(self.chunks):
 
             for item in chunk:
-                text_frames = math.ceil((item.transcription.end-item.transcription.start) * 60)
-                for frame in range(0, text_frames):
-                    if frame > 5:
-                        item.text.state = TextState.ACTIVATED
+                await asyncio.sleep(0)
+                item.text.state = TextState.ACTIVATED
+                event.set()
+            #     text_frames = math.ceil((item.transcription.end-item.transcription.start) * 60)
+            #     for frame in range(0, text_frames):
+            # break
 
-                    if layout.state.cursor == 10:
-                        layout.state.done = True
-                        break
-            break
+    async def draw_loop(self, layout, buffer, event):
+        while not layout.state.done:
+            await event.wait()
+            event.clear()
+            Renderer.render(layout, buffer)
+            layout.state.cursor += 1
+            print(f"[draw] cursor = {layout.state.cursor}")
 
-    def run(self):
+            if layout.state.cursor == 4:
+                layout.state.done = True
+                event.set()
+
+    async def run(self):
 
         def getCompany(company_id: str):
             with open('companies.yaml') as file:
@@ -98,9 +105,7 @@ class Engine:
         buffer = Layout(WIDTH, HEIGHT)
         buffer.create(company, self.chunks)
 
-        while not layout.state.done:
-            self.render(layout, buffer)
-            Renderer.render(layout, buffer)
-
-            layout.state.cursor += 1
-            print(layout.state.cursor)
+        event = asyncio.Event()
+        t1 = asyncio.create_task(self.state_loop(layout, buffer, event))
+        t2 = asyncio.create_task(self.draw_loop(layout, buffer, event))
+        await asyncio.gather(t1, t2)
