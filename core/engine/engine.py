@@ -1,6 +1,8 @@
 import json
 import math
+import time
 import asyncio
+import constants
 
 from core.ui.layout import Layout, Cursor
 from core.engine.render import Renderer
@@ -65,28 +67,31 @@ class Engine:
 
         self._total_frames = math.ceil(self._transcription[-1].end * 60)
 
-    async def state_loop(self, layout, buffer, event):
+    async def state_loop(self, layout, buffer, queue):
         for i, chunk in enumerate(self.chunks):
-
             for word in chunk:
-                await asyncio.sleep(0)
-                # word.state = WordState.ACTIVATED
-                event.set()
-            #     text_frames = math.ceil((item.transcription.end-item.transcription.start) * 60)
-            #     for frame in range(0, text_frames):
-            # break
+                word.state = WordState.ACTIVATED
+                text_frames = math.ceil((word.transcription.end-word.transcription.start) * 60)
+                for frame in range(0, text_frames):
 
-    async def draw_loop(self, layout, buffer, event):
-        while not layout.state.done:
-            await event.wait()
-            event.clear()
-            Renderer.render(layout, buffer)
-            layout.state.cursor.position += 1
-            print(f"[draw] cursor = {layout.state.cursor.position}")
+                    if frame < 10:
+                        word.size = frame/10 * constants.FONT_SIZE
 
-            if layout.state.cursor.position == 4:
-                layout.state.done = True
-                event.set()
+                    layout.state.cursor.position += 1
+                    await queue.put(layout.state.copy())
+                    await asyncio.sleep(0)
+
+    async def draw_loop(self, buffer, queue):
+        while True:
+            snapshot = await queue.get()
+            if snapshot is None:
+                print('break')
+                break
+
+            print(snapshot.current_chunk[0].content, snapshot.current_chunk[0].size)
+            time.sleep(1)
+            buffer.state = snapshot
+            Renderer.render(buffer, buffer)
 
     async def run(self):
 
@@ -96,7 +101,8 @@ class Engine:
         buffer = Layout(WIDTH, HEIGHT)
         buffer.create(self.chunks)
 
-        event = asyncio.Event()
-        t1 = asyncio.create_task(self.state_loop(layout, buffer, event))
-        t2 = asyncio.create_task(self.draw_loop(layout, buffer, event))
+        queue = asyncio.Queue(maxsize=20)
+        t1 = asyncio.create_task(self.state_loop(layout, buffer, queue))
+        t2 = asyncio.create_task(self.draw_loop(buffer, queue))
+
         await asyncio.gather(t1, t2)

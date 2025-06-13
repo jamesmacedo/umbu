@@ -17,6 +17,7 @@ class Row:
     def __init__(self, words: List[Word], layout, buffer):
 
         self.layout = layout
+        self.buffer = buffer
         self.words = words
 
         width_arr, height_arr = [], []
@@ -34,7 +35,16 @@ class Row:
         self.shape = Shape(x=0, y=0, width=np.sum(width_arr) + (constants.TEXT_PADDING * (len(width_arr) - 1)), height=np.max(height_arr))
 
     def draw_text(self, x, y, word):
+        self.layout.setFont(self.layout.context.layout, "Montserrant", word.size)
         self.layout.context.layout.set_text(word.content, -1)
+
+        ink_rect, logical_rect = self.buffer.context.layout.get_pixel_extents()
+
+        word.shape.width = logical_rect.width
+        word.shape.height = logical_rect.height
+
+        x = x - word.shape.width/2
+        y = y - word.shape.height/2
 
         data = (x, y, self.layout, word)
         classe = globals()["GuildStyle"]()

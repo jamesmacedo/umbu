@@ -30,6 +30,7 @@ class Word(BaseModel):
     content: str
     state: WordState = WordState.UNACTIVATED
     shape: Shape
+    size: float = 0
 
 
 class LayoutState(BaseModel):

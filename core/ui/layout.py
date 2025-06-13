@@ -62,5 +62,11 @@ class Layout:
 
         self.context = Context(surface, ctx, layout)
 
+    def clear(self):
+        self.context.context.save()
+        self.context.context.set_operator(cairo.OPERATOR_CLEAR)
+        self.context.context.paint()
+        self.context.context.restore()
+
     def save(self, name: str):
         self.context.surface.write_to_png(name)
