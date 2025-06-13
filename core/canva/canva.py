@@ -20,12 +20,16 @@ class Canva:
             cursor=Cursor(**{}),
             current_chunk=chunks[0],
             chunks=chunks,
-            current_word=chunks[0][0]
+            previous_word=chunks[0][0],
+            current_word=None
         )
 
     def clear(self):
         self.composing.clear()
         self.buffer.clear()
+        for layer in self.layers:
+            if not layer.locked:
+                layer.clear()
 
     def createLayer(self):
         layer = Layer()
@@ -33,7 +37,7 @@ class Canva:
         return layer
 
     def compose(self, frame: int):
-        for layer in self.layers[::-1]:
+        for layer in self.layers:
             self.composing.data.context.set_source_surface(layer.data.surface, 0, 0)
             self.composing.data.context.paint()
 

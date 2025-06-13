@@ -30,6 +30,7 @@ class Layer:
     state: LayoutState = None
     data: Data = None
     components: List[Text] = []
+    locked: bool = False
 
     # def setFont(self, layout, font: str = "", size: int = 10):
     #     desc = Pango.FontDescription()
@@ -46,6 +47,9 @@ class Layer:
         # self.setFont(layout, "Montserrant", constants.FONT_SIZE)
         self.data = Data(surface, ctx, layout)
         self.cursor = Cursor(**{})
+
+    def lock(self):
+        self.locked = True
 
     def setCursor(self, x: float, y: float):
         self.cursor.x = x

@@ -11,16 +11,17 @@ class Renderer:
 
         canva.clear()
 
-        # layer = canva.createLayer()
-        # layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
-        # row = Row(layer, [Text(layer, canva.buffer, word.copy(update={"state": WordState.UNACTIVATED})) for word in canva.state.current_chunk])
-        # row.draw()
+        if (canva.frame == 0 or canva.state.previous_word != canva.state.current_word):
+            layer = canva.createLayer()
+            layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
+            row = Row(layer, [Text(layer, canva.buffer, word.copy(update={"size": constants.FONT_SIZE})) for word in canva.state.current_chunk])
+            row.draw()
+            layer.lock()
 
         layer2 = canva.createLayer()
         layer2.setCursor(0, 0)
-        # row2 = Row(layer2, [Text(layer2, canva.buffer, word) for word in canva.state.current_chunk])
-
         text = Text(layer2, canva.buffer, canva.state.current_word)
+        print(f"current_size: {canva.state.current_word.size}")
         text.draw()
 
         canva.compose(canva.frame)

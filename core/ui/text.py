@@ -6,7 +6,7 @@ from typing import List
 from core.models.layout import Shape as ShapeModel
 from core.ui.style.mortgage import GuildStyle
 from gi.repository import Pango, PangoCairo
-from core.models.layout import Word, Shape
+from core.models.layout import Word, Shape, WordState
 
 # class Row:
 #
@@ -60,6 +60,7 @@ from core.models.layout import Word, Shape
 class Text:
 
     word: Word = None
+    final_shape: Shape
 
     def setFont(self, font: str = "", size: int = 10):
         desc = Pango.FontDescription()
@@ -75,7 +76,18 @@ class Text:
 
         self.setFont("Montserrant", constants.FONT_SIZE)
 
-        print(word.state)
+        buffer.data.layout.set_text(word.content, -1)
+        buffer.data.context.set_source_rgb(1, 1, 1)
+        ink_rect, logical_rect = buffer.data.layout.get_pixel_extents()
+
+        self.final_shape = Shape(
+            x=0,
+            y=0,
+            width=logical_rect.width,
+            height=logical_rect.height
+        )
+
+        self.setFont("Montserrant", word.size)
 
         buffer.data.layout.set_text(word.content, -1)
         buffer.data.context.set_source_rgb(1, 1, 1)
@@ -84,11 +96,22 @@ class Text:
         word.shape.width = logical_rect.width
         word.shape.height = logical_rect.height
 
+
+
         self.word = word
 
     def draw(self):
+        print(self.word.shape.width)
         self.layer.data.layout.set_text(self.word.content, -1)
-        data = (self.word.shape.x, self.word.shape.y, self.layer, self.word)
+
+        if self.word.shape.width != self.final_shape.width:
+            x = self.word.shape.x + self.final_shape.width/2 - self.word.shape.width/2
+            y = self.word.shape.y + self.final_shape.height/2 - self.word.shape.height/2
+        else:
+            x = self.word.shape.x
+            y = self.word.shape.y
+
+        data = (x, y, self.layer, self.word)
         classe = globals()["GuildStyle"]()
         getattr(classe, "draw1")(*data)
 
@@ -119,6 +142,10 @@ class Row:
 
     def draw(self):
         for i, comp in enumerate(self.components):
+
+            if (comp.word.state != WordState.COMPLETED):
+                comp.word.state = WordState.UNACTIVATED
+
             comp.word.shape.x = self.layer.cursor.x
 
             new_x = self.layer.cursor.x + comp.word.shape.width + constants.TEXT_PADDING
