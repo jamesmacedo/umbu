@@ -5,21 +5,23 @@ from core.ui.style.base import StyleBase
 
 class GuildStyle(StyleBase):
 
-    def draw1(self, x, y, layout, word):
-        if word.state is WordState.COMPLETED:
-            layout.context.context.set_source_rgb(1, 1, 1)
-        elif word.state is WordState.ACTIVATED:
-            layout.context.context.set_source_rgb(0,1,0)
-        elif word.state is WordState.UNACTIVATED:
-            layout.context.context.set_source_rgb(1,0,1)
-            layout.context.context.set_line_width(1.5)
+    def draw1(self, x, y, layer, word):
 
-        layout.context.context.move_to(x, y)
+        layer.data.context.move_to(x, y)
+
+        if word.state is WordState.COMPLETED:
+            layer.data.context.set_source_rgb(1, 1, 1)
+        elif word.state is WordState.ACTIVATED:
+            layer.data.context.set_source_rgb(0,1,0)
+        elif word.state is WordState.UNACTIVATED:
+            layer.data.context.set_source_rgb(1,0,1)
+            layer.data.context.set_line_width(1.5)
+
         if word.state == WordState.UNACTIVATED:
-            PangoCairo.layout_path(layout.context.context, layout.context.layout)
-            layout.context.context.stroke()
+            PangoCairo.layout_path(layer.data.context, layer.data.layout)
+            layer.data.context.stroke()
         else:
-            PangoCairo.show_layout(layout.context.context, layout.context.layout)
+            PangoCairo.show_layout(layer.data.context, layer.data.layout)
 
     def draw2(self, x, y, layout, word):
         if word.state is WordState.COMPLETED:

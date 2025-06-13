@@ -1,17 +1,26 @@
 import constants
 
-from core.ui.text import Row
+from core.ui.text import Row, Text
+from core.models.layout import WordState
 
 
 class Renderer:
 
     @staticmethod
-    def render(layout, buffer):
-        row = Row(layout.state.current_chunk,
-                layout,
-                buffer)
+    def render(canva):
 
-        layout.clear()
-        row.draw((layout.width - row.shape.width)/2, (layout.height * constants.VERTICAL_ALIGN) - row.shape.height/2)
+        canva.clear()
 
-        layout.save(f"frames/{layout.state.cursor.position:08d}.png")
+        # layer = canva.createLayer()
+        # layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
+        # row = Row(layer, [Text(layer, canva.buffer, word.copy(update={"state": WordState.UNACTIVATED})) for word in canva.state.current_chunk])
+        # row.draw()
+
+        layer2 = canva.createLayer()
+        layer2.setCursor(0, 0)
+        # row2 = Row(layer2, [Text(layer2, canva.buffer, word) for word in canva.state.current_chunk])
+
+        text = Text(layer2, canva.buffer, canva.state.current_word)
+        text.draw()
+
+        canva.compose(canva.frame)

@@ -25,7 +25,6 @@ class WordState(IntEnum):
 
 
 class Word(BaseModel):
-    cursor: Cursor | None
     transcription: Transcription
     content: str
     state: WordState = WordState.UNACTIVATED
@@ -34,9 +33,8 @@ class Word(BaseModel):
 
 
 class LayoutState(BaseModel):
-    done: bool
-    cursor: Cursor | None
-    total_frames: int
+    current_word: Word | None
     current_chunk: List[Word] | None
     chunks: List[List[Word]]
-    duration: float
+    duration: float = 0
+    total_frames: int = 0

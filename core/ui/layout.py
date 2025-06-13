@@ -21,23 +21,14 @@ class Context:
         self.layout = layout
 
 
-class Layout:
+class Canvas:
 
     state: LayoutState = None
     context: Context = None
-    surface = None
-    text = None
 
     def __init__(self, width: int = 720, height: int = 1280):
         self.width = width
         self.height = height
-
-    def setFont(self, layout, font: str = "", size: int = 10):
-        desc = Pango.FontDescription()
-        desc.set_family(font)
-        desc.set_size(size * Pango.SCALE)
-        desc.set_weight(Pango.Weight.BOLD)
-        layout.set_font_description(desc)
 
     def create(self, chunks):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.width, self.height)
@@ -57,8 +48,6 @@ class Layout:
         fontmap = PangoCairo.FontMap.get_default()
         fontmap = PangoCairo.FontMap.set_default(fontmap)
         fontmap = PangoFT2.FontMap.new()
-
-        self.setFont(layout, "Montserrant", constants.FONT_SIZE)
 
         self.context = Context(surface, ctx, layout)
 
