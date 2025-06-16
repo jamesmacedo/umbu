@@ -5,7 +5,6 @@ import constants
 from core.models.layout import LayoutState, Cursor
 from gi.repository import Pango, PangoCairo, PangoFT2
 
-from core.ui.text import Text
 from typing import List
 
 gi.require_version("Pango", "1.0")
@@ -29,7 +28,7 @@ class Layer:
     cursor: Cursor
     state: LayoutState = None
     data: Data = None
-    components: List[Text] = []
+    components: List = []
     locked: bool = False
 
     # def setFont(self, layout, font: str = "", size: int = 10):

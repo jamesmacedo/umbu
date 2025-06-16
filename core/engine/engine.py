@@ -6,7 +6,6 @@ import constants
 
 from core.canva.canva import Canva
 from core.canva.layer import Layer
-from core.engine.render import Renderer
 from core.models.transcription import Transcription
 from core.models.layout import Word, WordState, Shape
 from typing import List, Any
@@ -91,7 +90,7 @@ class Engine:
             await queue.put(canva.state.copy())
             await asyncio.sleep(0)
 
-    async def draw_loop(self, canva, queue):
+    async def draw_loop(self, canva, classe, queue):
 
         while True:
             snapshot = await queue.get()
@@ -101,17 +100,17 @@ class Engine:
 
             canva.state = snapshot
 
-            Renderer.render(canva)
+            classe(canva).draw()
 
             canva.frame += 1
             print("desenhado")
 
-    async def run(self):
+    async def run(self, classe):
 
         canva = Canva(self.chunks)
 
         queue = asyncio.Queue(maxsize=20)
         t1 = asyncio.create_task(self.state_loop(canva, queue))
-        t2 = asyncio.create_task(self.draw_loop(canva, queue))
+        t2 = asyncio.create_task(self.draw_loop(canva, classe, queue))
 
         await asyncio.gather(t1, t2)
