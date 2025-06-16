@@ -9,9 +9,10 @@ class Renderer:
     @staticmethod
     def render(canva):
 
+        # force = canva.state.previous_chunk != canva.state.current_chunk
         canva.clear()
 
-        if (canva.frame == 0 or canva.state.previous_word != canva.state.current_word):
+        if (canva.chunk_frame == 0 or canva.state.previous_word != canva.state.current_word):
             layer = canva.createLayer()
             layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
             row = Row(layer, [Text(layer, canva.buffer, word.copy(update={"size": constants.FONT_SIZE})) for word in canva.state.current_chunk])

@@ -68,6 +68,7 @@ class Engine:
 
     async def state_loop(self, canva, queue):
         for i, chunk in enumerate(canva.state.chunks):
+            canva.clear(True)
             for word in chunk:
                 canva.state.current_word = word
                 word.state = WordState.ACTIVATED
@@ -75,17 +76,20 @@ class Engine:
                 for frame in range(0, text_frames):
                     if frame <= constants.INTRO_THRESHOLD:
                         word.size = frame/constants.INTRO_THRESHOLD * constants.FONT_SIZE
-
-                    if frame > constants.INTRO_THRESHOLD:
+                    else:
                         word.state = WordState.COMPLETED
-                        canva.state.previous_word = canva.state.current_word
-                        break
 
                     await queue.put(canva.state.copy())
                     await asyncio.sleep(0)
 
+                canva.state.previous_word = canva.state.current_word
+
                 await queue.put(canva.state.copy())
                 await asyncio.sleep(0)
+
+            canva.state.current_chunk = chunk
+            await queue.put(canva.state.copy())
+            await asyncio.sleep(0)
 
     async def draw_loop(self, canva, queue):
 
@@ -101,9 +105,6 @@ class Engine:
 
             canva.frame += 1
             print("desenhado")
-
-            if canva.frame == 20:
-                exit(1)
 
     async def run(self):
 

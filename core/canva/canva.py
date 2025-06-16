@@ -7,6 +7,7 @@ from typing import List
 class Canva:
 
     frame: int = 0
+    chunk_frame: int = 0
     state: LayoutState
     layers: List[Layer] = []
     buffer: Layer
@@ -24,11 +25,11 @@ class Canva:
             current_word=None
         )
 
-    def clear(self):
+    def clear(self, force: bool = False):
         self.composing.clear()
         self.buffer.clear()
         for layer in self.layers:
-            if not layer.locked:
+            if not layer.locked or force:
                 layer.clear()
 
     def createLayer(self):

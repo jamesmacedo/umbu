@@ -33,7 +33,8 @@ class Word(BaseModel):
 
 
 class LayoutState(BaseModel):
-    previous_word: Word | None
+    previous_word: Word | None = None
+    previous_chunk: List[Word] | None = None
     current_word: Word | None
     current_chunk: List[Word] | None
     chunks: List[List[Word]]
