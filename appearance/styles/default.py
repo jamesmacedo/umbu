@@ -3,18 +3,18 @@ from core.models.layout import WordState
 from core.engine.appearance import Style
 
 
-class StaticStyle(Style):
+class DefaultStyle(Style):
 
     def draw(self, x, y, layer, word):
 
         layer.data.context.move_to(x, y)
 
         if word.state is WordState.COMPLETED:
-            layer.data.context.set_source_rgb(1, 1, 1)
+            layer.data.context.set_source_rgb(*super().getColorsCairo("#F9C606"))
         elif word.state is WordState.ACTIVATED:
-            layer.data.context.set_source_rgb(1, 1, 1)
+            layer.data.context.set_source_rgb(*super().getColorsCairo("#262A82"))
         elif word.state is WordState.UNACTIVATED:
-            layer.data.context.set_source_rgb(1, 0, 1)
+            layer.data.context.set_source_rgb(*super().getColorsCairo("#262A82"))
             layer.data.context.set_line_width(1.5)
 
         if word.state == WordState.UNACTIVATED:

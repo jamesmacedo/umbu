@@ -4,7 +4,6 @@ import numpy as np
 from typing import List
 
 from core.models.layout import Shape as ShapeModel
-from core.ui.style.mortgage import GuildStyle
 from gi.repository import Pango, PangoCairo
 from core.models.layout import Word, Shape, WordState
 

@@ -1,6 +1,7 @@
 import constants
 
 from core.ui import Row, Text
+from core.models.layout import WordState
 from core.engine.appearance import Animation
 
 
@@ -14,7 +15,7 @@ class DefaultAnimation(Animation):
         self.canva.clear()
 
         layer2 = self.canva.createLayer()
-        text = Text(layer2, self.canva.buffer, self.canva.state.current_word)
+        text = Text(layer2, self.canva.buffer, self.canva.state.current_word, self.canva.style)
 
         x = (constants.WIDTH - text.word.shape.width)/2
         layer2.setCursor(x, (constants.HEIGHT * constants.VERTICAL_ALIGN))
@@ -24,10 +25,10 @@ class DefaultAnimation(Animation):
 
         layer2.data.layout.set_text(text.word.content, -1)
 
-        # if self.canva.state.current_word.current_frame <= constants.INTRO_THRESHOLD:
-        #     self.canva.state.current_word.size = self.canva.state.current_word.current_frame/constants.INTRO_THRESHOLD * constants.FONT_SIZE
-        # else:
-        #     self.canva.state.current_word.state = WordState.COMPLETED
+        if self.canva.state.current_word.current_frame <= constants.INTRO_THRESHOLD:
+            self.canva.state.current_word.size = self.canva.state.current_word.current_frame/constants.INTRO_THRESHOLD * constants.FONT_SIZE
+        else:
+            self.canva.state.current_word.state = WordState.COMPLETED
 
         if text.word.shape.width != text.final_shape.width:
             x = text.word.shape.x

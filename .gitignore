@@ -3,3 +3,6 @@ debug/*
 
 __pycache__
 **/__pycache__
+
+*.mov
+*.mp4

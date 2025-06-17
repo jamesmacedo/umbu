@@ -1,4 +1,7 @@
-class StyleBase:
+from abc import ABC, abstractmethod
+
+
+class Style(ABC):
 
     def getColorsRGB(self, value: str):
         value = value.lstrip('#')
