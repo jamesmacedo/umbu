@@ -6,6 +6,7 @@ from typing import List
 
 class Canva:
 
+    style: type
     frame: int = 0
     chunk_frame: int = 0
     state: LayoutState
@@ -13,9 +14,11 @@ class Canva:
     buffer: Layer
     composing: Layer
 
-    def __init__(self, chunks: List[Word]):
+    def __init__(self, chunks: List[Word], style: type):
         self.buffer = Layer()
         self.composing = Layer()
+
+        self.style = style
 
         self.state = LayoutState(
             cursor=Cursor(**{}),

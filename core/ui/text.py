@@ -61,6 +61,7 @@ class Text:
 
     word: Word = None
     final_shape: Shape
+    style: type = None
 
     def setFont(self, font: str = "", size: int = 10):
         desc = Pango.FontDescription()
@@ -70,11 +71,13 @@ class Text:
         self.layer.data.layout.set_font_description(desc)
         self.buffer.data.layout.set_font_description(desc)
 
-    def __init__(self, layer, buffer, word: Word):
+    def __init__(self, layer, buffer, word: Word, style: type):
         self.buffer = buffer
         self.layer = layer
 
-        self.setFont("Montserrant", constants.FONT_SIZE)
+        self.style = style
+
+        self.setFont("Montserrant", word.size)
 
         buffer.data.layout.set_text(word.content, -1)
         buffer.data.context.set_source_rgb(1, 1, 1)
@@ -96,12 +99,9 @@ class Text:
         word.shape.width = logical_rect.width
         word.shape.height = logical_rect.height
 
-
-
         self.word = word
 
     def draw(self):
-        print(self.word.shape.width)
         self.layer.data.layout.set_text(self.word.content, -1)
 
         if self.word.shape.width != self.final_shape.width:
@@ -112,8 +112,10 @@ class Text:
             y = self.word.shape.y
 
         data = (x, y, self.layer, self.word)
-        classe = globals()["GuildStyle"]()
-        getattr(classe, "draw1")(*data)
+        self.style().draw(*data)
+
+        # classe = globals()["GuildStyle"]()
+        # getattr(classe, "draw1")(*data)
 
 
 class Row:
@@ -143,8 +145,8 @@ class Row:
     def draw(self):
         for i, comp in enumerate(self.components):
 
-            if (comp.word.state != WordState.COMPLETED):
-                comp.word.state = WordState.UNACTIVATED
+            # if (comp.word.state != WordState.COMPLETED):
+            #     comp.word.state = WordState.UNACTIVATED
 
             comp.word.shape.x = self.layer.cursor.x
 

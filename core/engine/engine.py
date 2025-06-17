@@ -1,6 +1,5 @@
 import json
 import math
-import time
 import asyncio
 import constants
 
@@ -9,8 +8,6 @@ from core.canva.layer import Layer
 from core.models.transcription import Transcription
 from core.models.layout import Word, WordState, Shape
 from typing import List, Any
-
-WIDTH, HEIGHT = 720, 1280
 
 
 class Engine:
@@ -60,6 +57,9 @@ class Engine:
 
         with open(path, 'r') as f:
             data = json.load(f)
+            for d in data:
+                print(d)
+
             self._transcription = [Transcription(**d) for d in data]
             self.chunks = create_chunk(self._transcription, self.chunk_size)
 
@@ -68,46 +68,42 @@ class Engine:
     async def state_loop(self, canva, queue):
         for i, chunk in enumerate(canva.state.chunks):
             canva.clear(True)
+            canva.state.current_chunk = chunk
             for word in chunk:
                 canva.state.current_word = word
                 word.state = WordState.ACTIVATED
-                text_frames = math.ceil((word.transcription.end-word.transcription.start) * 60)
-                for frame in range(0, text_frames):
-                    if frame <= constants.INTRO_THRESHOLD:
-                        word.size = frame/constants.INTRO_THRESHOLD * constants.FONT_SIZE
-                    else:
-                        word.state = WordState.COMPLETED
 
+                text_frames = math.ceil((word.transcription.end-word.transcription.start) * 30)
+                for frame in range(0, text_frames):
+                    word.current_frame = frame
                     await queue.put(canva.state.copy())
                     await asyncio.sleep(0)
 
                 canva.state.previous_word = canva.state.current_word
 
-                await queue.put(canva.state.copy())
-                await asyncio.sleep(0)
+                # await queue.put(canva.state.copy())
+                # await asyncio.sleep(0)
+            # await queue.put(canva.state.copy())
+            # await asyncio.sleep(0)
 
-            canva.state.current_chunk = chunk
-            await queue.put(canva.state.copy())
-            await asyncio.sleep(0)
+        print("finished")
+        await queue.put(None)
+        await asyncio.sleep(0)
 
     async def draw_loop(self, canva, classe, queue):
 
         while True:
             snapshot = await queue.get()
             if snapshot is None:
-                print('break')
                 break
 
             canva.state = snapshot
-
             classe(canva).draw()
-
             canva.frame += 1
-            print("desenhado")
 
-    async def run(self, classe):
+    async def run(self, classe, style):
 
-        canva = Canva(self.chunks)
+        canva = Canva(self.chunks, style)
 
         queue = asyncio.Queue(maxsize=20)
         t1 = asyncio.create_task(self.state_loop(canva, queue))

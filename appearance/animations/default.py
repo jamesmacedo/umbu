@@ -11,21 +11,33 @@ class DefaultAnimation(Animation):
 
     def draw(self):
 
-        # force = self.canva.state.previous_chunk != self.canva.state.current_chunk
         self.canva.clear()
 
-        if (self.canva.chunk_frame == 0 or self.canva.state.previous_word != self.canva.state.current_word):
-            layer = self.canva.createLayer()
-            layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
-            row = Row(layer, [Text(layer, self.canva.buffer, word.copy(update={"size": constants.FONT_SIZE})) for word in self.canva.state.current_chunk])
-            row.draw()
-            layer.lock()
-
         layer2 = self.canva.createLayer()
-        layer2.setCursor(0, 0)
         text = Text(layer2, self.canva.buffer, self.canva.state.current_word)
-        print(f"current_size: {self.canva.state.current_word.size}")
+
+        x = (constants.WIDTH - text.word.shape.width)/2
+        layer2.setCursor(x, (constants.HEIGHT * constants.VERTICAL_ALIGN))
+
+        text.word.shape.x = layer2.cursor.x
+        text.word.shape.y = layer2.cursor.y
+
+        layer2.data.layout.set_text(text.word.content, -1)
+
+        # if self.canva.state.current_word.current_frame <= constants.INTRO_THRESHOLD:
+        #     self.canva.state.current_word.size = self.canva.state.current_word.current_frame/constants.INTRO_THRESHOLD * constants.FONT_SIZE
+        # else:
+        #     self.canva.state.current_word.state = WordState.COMPLETED
+
+        if text.word.shape.width != text.final_shape.width:
+            x = text.word.shape.x
+            y = text.word.shape.y + text.final_shape.height/2 - text.word.shape.height/2
+        else:
+            x = text.word.shape.x
+            y = text.word.shape.y
+
+        text.word.shape.x = x
+        text.word.shape.y = y
         text.draw()
 
         self.canva.compose(self.canva.frame)
-        pass

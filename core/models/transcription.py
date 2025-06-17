@@ -1,7 +1,7 @@
-from pydantic import BaseModel, PositiveFloat
+from pydantic import BaseModel 
 
 
 class Transcription(BaseModel):
     word: str
-    start: PositiveFloat
-    end: PositiveFloat
+    start: float
+    end: float
