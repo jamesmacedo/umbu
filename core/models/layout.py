@@ -31,6 +31,7 @@ class Word(BaseModel):
     shape: Shape
     size: float = 0
     current_frame: int = 0
+    total_frames: int = 0
 
 
 class LayoutState(BaseModel):

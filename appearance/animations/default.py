@@ -31,8 +31,8 @@ class DefaultAnimation(Animation):
             self.canva.state.current_word.state = WordState.COMPLETED
 
         if text.word.shape.width != text.final_shape.width:
-            x = text.word.shape.x
-            y = text.word.shape.y + text.final_shape.height/2 - text.word.shape.height/2
+            x = text.word.shape.x - text.final_shape.width/2 + text.word.shape.width/2
+            y = text.word.shape.y
         else:
             x = text.word.shape.x
             y = text.word.shape.y

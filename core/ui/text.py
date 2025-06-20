@@ -76,7 +76,7 @@ class Text:
 
         self.style = style
 
-        self.setFont("Montserrant", word.size)
+        self.setFont("Montserrant", constants.FONT_SIZE)
 
         buffer.data.layout.set_text(word.content, -1)
         buffer.data.context.set_source_rgb(1, 1, 1)

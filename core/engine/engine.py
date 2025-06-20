@@ -17,7 +17,7 @@ class Engine:
     buffer: Layer | None = None
 
     def __init__(self):
-        self._chunk_size = 4
+        self._chunk_size = constants.CHUNK_SIZE
 
     @property
     def chunk_size(self):
@@ -57,9 +57,6 @@ class Engine:
 
         with open(path, 'r') as f:
             data = json.load(f)
-            for d in data:
-                print(d)
-
             self._transcription = [Transcription(**d) for d in data]
             self.chunks = create_chunk(self._transcription, self.chunk_size)
 
@@ -73,8 +70,9 @@ class Engine:
                 canva.state.current_word = word
                 word.state = WordState.ACTIVATED
 
-                text_frames = math.ceil((word.transcription.end-word.transcription.start) * 30)
-                for frame in range(0, text_frames):
+                total_frames = math.ceil((word.transcription.end-word.transcription.start) * constants.FPS)
+                word.total_frames = total_frames
+                for frame in range(0, total_frames):
                     word.current_frame = frame
                     await queue.put(canva.state.copy())
                     await asyncio.sleep(0)
