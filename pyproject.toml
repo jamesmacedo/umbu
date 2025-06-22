@@ -10,7 +10,7 @@ requires-python = ">=3.9"
 dependencies = []
 package-mode = true
 packages = [
-    { include = "umbu", from = "." }
+    { include = "umbu", from = "umbu" }
 ]
 
 

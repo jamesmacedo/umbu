@@ -1,3 +1,4 @@
+import os
 from core.canva.layer import Layer
 from core.models.layout import LayoutState, Word, Cursor
 
@@ -13,6 +14,7 @@ class Canva:
     layers: List[Layer] = []
     buffer: Layer
     composing: Layer
+    destination_path: str
 
     def __init__(self, chunks: List[Word], style: type):
         self.buffer = Layer()
@@ -45,4 +47,5 @@ class Canva:
             self.composing.data.context.set_source_surface(layer.data.surface, 0, 0)
             self.composing.data.context.paint()
 
-        self.composing.data.surface.write_to_png(f"frames/{frame:08d}.png")
+        os.makedirs(self.destination_path, exist_ok=True)
+        self.composing.data.surface.write_to_png(os.path.join(self.destination_path, f"{frame:08d}.png"))

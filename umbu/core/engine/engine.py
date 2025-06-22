@@ -1,4 +1,3 @@
-import json
 import math
 import asyncio
 import constants
@@ -7,7 +6,7 @@ from core.canva.canva import Canva
 from core.canva.layer import Layer
 from core.models.transcription import Transcription
 from core.models.layout import Word, WordState, Shape
-from typing import List, Any
+from typing import List, Any, Dict
 
 
 class Engine:
@@ -38,7 +37,7 @@ class Engine:
     def chunks(self, c) -> List[List[Transcription]]:
         self._chunks = c
 
-    def load(self, path: str):
+    def load(self, transcription: List[Dict]):
         def create_chunk(arr: List[Any], size: int) -> List[List[Word]]:
             chunks: List[List[Word]] = []
             for i in range(0, len(arr), size):
@@ -55,12 +54,8 @@ class Engine:
                 chunks.append(item_chunk)
             return chunks
 
-        with open(path, 'r') as f:
-            data = json.load(f)
-            self._transcription = [Transcription(**d) for d in data]
-            self.chunks = create_chunk(self._transcription, self.chunk_size)
-
-        # self._total_frames = math.ceil(self._transcription[-1].end * 60)
+        self._transcription = [Transcription(**d) for d in transcription]
+        self.chunks = create_chunk(self._transcription, self.chunk_size)
 
     async def state_loop(self, canva, queue):
         for i, chunk in enumerate(canva.state.chunks):
@@ -99,12 +94,17 @@ class Engine:
             classe(canva).draw()
             canva.frame += 1
 
-    async def run(self, classe, style):
-
-        canva = Canva(self.chunks, style)
+    async def build(self, classe, style):
 
         queue = asyncio.Queue(maxsize=20)
-        t1 = asyncio.create_task(self.state_loop(canva, queue))
-        t2 = asyncio.create_task(self.draw_loop(canva, classe, queue))
+        t1 = asyncio.create_task(self.state_loop(self.canva, queue))
+        t2 = asyncio.create_task(self.draw_loop(self.canva, classe, queue))
 
         await asyncio.gather(t1, t2)
+
+    async def run(self, classe, style, config: Dict):
+
+        self.canva = Canva(self.chunks, style)
+        self.canva.destination_path = config['path']
+
+        await self.build(classe, style)
