@@ -1,8 +1,8 @@
 import gi
 import cairo
-import constants
+import umbu.constants as constants
 
-from core.models.layout import LayoutState, Cursor
+from umbu.core.models.layout import LayoutState, Cursor
 from gi.repository import Pango, PangoCairo, PangoFT2
 
 from typing import List

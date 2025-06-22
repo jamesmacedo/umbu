@@ -1,11 +1,11 @@
 import math
 import asyncio
-import constants
+import umbu.constants as constants
 
-from core.canva.canva import Canva
-from core.canva.layer import Layer
-from core.models.transcription import Transcription
-from core.models.layout import Word, WordState, Shape
+from umbu.core.canva.canva import Canva
+from umbu.core.canva.layer import Layer
+from umbu.core.models.transcription import Transcription
+from umbu.core.models.layout import Word, WordState, Shape
 from typing import List, Any, Dict
 
 
@@ -102,7 +102,7 @@ class Engine:
 
         await asyncio.gather(t1, t2)
 
-    async def run(self, classe, style, config: Dict):
+    async def run(self, config: Dict, classe, style):
 
         self.canva = Canva(self.chunks, style)
         self.canva.destination_path = config['path']

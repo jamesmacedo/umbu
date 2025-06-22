@@ -1,6 +1,6 @@
 import os
-from core.canva.layer import Layer
-from core.models.layout import LayoutState, Word, Cursor
+from umbu.core.canva.layer import Layer
+from umbu.core.models.layout import LayoutState, Word, Cursor
 
 from typing import List
 

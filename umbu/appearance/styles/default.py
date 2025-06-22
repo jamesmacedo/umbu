@@ -1,6 +1,6 @@
 from gi.repository import PangoCairo
-from core.models.layout import WordState
-from core.engine.appearance import Style
+from umbu.core.models.layout import WordState
+from umbu.core.engine.appearance import Style
 
 
 class DefaultStyle(Style):

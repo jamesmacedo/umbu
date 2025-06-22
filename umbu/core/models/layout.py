@@ -2,7 +2,7 @@ from typing import List
 from enum import IntEnum
 from pydantic import BaseModel
 
-from core.models.transcription import Transcription
+from umbu.core.models.transcription import Transcription
 
 
 class Cursor(BaseModel):

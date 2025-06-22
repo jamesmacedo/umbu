@@ -1,11 +1,11 @@
-import constants
+import umbu.constants as constants
 import numpy as np
 
 from typing import List
 
-from core.models.layout import Shape as ShapeModel
+from umbu.core.models.layout import Shape as ShapeModel
+from umbu.core.models.layout import Word, Shape, WordState
 from gi.repository import Pango, PangoCairo
-from core.models.layout import Word, Shape, WordState
 
 # class Row:
 #

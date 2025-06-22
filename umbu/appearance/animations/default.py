@@ -1,8 +1,8 @@
-import constants
+import umbu.constants as constants
 
-from core.ui import Row, Text
-from core.models.layout import WordState
-from core.engine.appearance import Animation
+from umbu.core.ui import Row, Text
+from umbu.core.models.layout import WordState
+from umbu.core.engine.appearance import Animation
 
 
 class DefaultAnimation(Animation):
