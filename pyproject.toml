@@ -1,0 +1,19 @@
+[project]
+name = "umbu"
+version = "0.0.1"
+description = "Open-source tool to automatically generate captions for your videos"
+authors = [
+    {name = "James Yan"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+packages = [
+    { include = "umbu", from = "." }
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
