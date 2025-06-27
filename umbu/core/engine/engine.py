@@ -118,4 +118,4 @@ class Engine:
 
         await self.build(classe, style)
 
-        Video.sequence(path)
+        return Video.sequence(path)
