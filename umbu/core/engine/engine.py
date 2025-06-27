@@ -1,4 +1,6 @@
+import os
 import math
+import shutil
 import asyncio
 import umbu.constants as constants
 
@@ -6,6 +8,9 @@ from umbu.core.canva.canva import Canva
 from umbu.core.canva.layer import Layer
 from umbu.core.models.transcription import Transcription
 from umbu.core.models.layout import Word, WordState, Shape
+
+from umbu.core.video import Video
+
 from typing import List, Any, Dict
 
 
@@ -56,6 +61,7 @@ class Engine:
 
         self._transcription = [Transcription(**d) for d in transcription]
         self.chunks = create_chunk(self._transcription, self.chunk_size)
+        return self
 
     async def state_loop(self, canva, queue):
         for i, chunk in enumerate(canva.state.chunks):
@@ -102,9 +108,14 @@ class Engine:
 
         await asyncio.gather(t1, t2)
 
-    async def run(self, config: Dict, classe, style):
+    async def run(self, path: str, classe, style):
 
-        self.canva = Canva(self.chunks, style)
-        self.canva.destination_path = config['path']
+        if os.path.isdir(path) and not os.path.isfile(path):
+            if os.listdir(path):
+                shutil.rmtree(path)
+
+        self.canva = Canva(self.chunks, style, path)
 
         await self.build(classe, style)
+
+        Video.sequence(path)

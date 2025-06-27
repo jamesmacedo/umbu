@@ -1,4 +1,5 @@
 import os
+
 from umbu.core.canva.layer import Layer
 from umbu.core.models.layout import LayoutState, Word, Cursor
 
@@ -16,9 +17,10 @@ class Canva:
     composing: Layer
     destination_path: str
 
-    def __init__(self, chunks: List[Word], style: type):
+    def __init__(self, chunks: List[Word], style: type, path: str):
         self.buffer = Layer()
         self.composing = Layer()
+        self.destination_path = path
 
         self.style = style
 
