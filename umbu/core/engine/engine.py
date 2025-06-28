@@ -138,9 +138,10 @@ class Engine:
 
     async def run(self, path: str, classe, style):
 
-        # if os.path.isdir(path) and not os.path.isfile(path):
-        #     if os.listdir(path):
-        #         shutil.rmtree(path)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+
+        os.makedirs(path)
 
         states = self._serialize_states()
         total_frames = len(states)
