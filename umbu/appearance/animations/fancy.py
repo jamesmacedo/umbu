@@ -10,24 +10,29 @@ class FancyAnimation(Animation):
     def setup(self):
         pass
 
-    def draw(self):
+    def draw(self, state):
 
-        self.canva.clear()
+        self.canva.clear(True)
 
-        if (self.canva.frame == 0 or self.canva.state.previous_word != self.canva.state.current_word):
-            layer = self.canva.createLayer()
-            layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
-            row = Row(layer, [Text(layer, self.canva.buffer, word.copy(update={"size": constants.FONT_SIZE}), self.canva.style) for word in self.canva.state.current_chunk])
-            row.draw()
-            layer.lock()
+        layer = self.canva.createOrFindLayer("BACKGROUND")
+        layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
+        row = Row(layer, [Text(layer, self.canva.buffer, word.copy(update={"size": constants.FONT_SIZE}), self.canva.style) for word in state.current_chunk])
+        row.draw()
+        layer.lock()
 
-        layer2 = self.canva.createLayer()
+        layer2 = self.canva.createOrFindLayer("FOREGROUND")
         layer2.setCursor(0, 0)
-        text = Text(layer2, self.canva.buffer, self.canva.state.current_word, self.canva.style)
 
-        if self.canva.state.current_word.current_frame >= self.canva.state.current_word.total_frames-2:
-            self.canva.state.current_word.state = WordState.COMPLETED
+        word_state = WordState.ACTIVATED
+        if state.current_word.current_frame >= state.current_word.total_frames-4:
+            word_state = WordState.COMPLETED
+            print(f"frame fancy: {state.current_word.current_frame}")
 
+        print(f"state: {word_state}")
+
+        text = Text(layer2, self.canva.buffer, state.current_word.copy(update={'state': word_state}), self.canva.style)
         text.draw()
 
-        self.canva.compose(self.canva.frame)
+        bytes = self.canva.compose()
+        self.canva.dispose()
+        return bytes

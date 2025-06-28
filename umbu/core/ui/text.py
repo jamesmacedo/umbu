@@ -110,11 +110,7 @@ class Text:
             x = self.word.shape.x
             y = self.word.shape.y
 
-        data = (x, y, self.layer, self.word)
-        self.style().draw(*data)
-
-        # classe = globals()["GuildStyle"]()
-        # getattr(classe, "draw1")(*data)
+        self.style().draw(x, y, self.layer, self.word)
 
 
 class Row:
@@ -128,7 +124,7 @@ class Row:
 
         width_arr = [component.word.shape.width for component in components]
 
-        width = np.sum(np.sum(width_arr) + (constants.TEXT_PADDING * (len(width_arr) - 1)))
+        width = sum(width_arr) + constants.TEXT_PADDING * (len(width_arr) - 1)
         height = np.max([component.word.shape.height for component in components])
 
         self.shape = Shape(

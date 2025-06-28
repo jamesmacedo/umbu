@@ -10,12 +10,20 @@ class DefaultAnimation(Animation):
     def setup(self):
         pass
 
-    def draw(self):
+    def draw(self, state):
 
         self.canva.clear()
 
-        layer2 = self.canva.createLayer()
-        text = Text(layer2, self.canva.buffer, self.canva.state.current_word, self.canva.style)
+        layer2 = self.canva.createOrFindLayer("STAGE")
+        word_state = WordState.ACTIVATED
+
+        size = constants.FONT_SIZE
+        if state.current_word.current_frame <= constants.INTRO_THRESHOLD:
+            size = state.current_word.current_frame/constants.INTRO_THRESHOLD * constants.FONT_SIZE
+        else:
+            word_state = WordState.COMPLETED
+
+        text = Text(layer2, self.canva.buffer, state.current_word.copy(update={'size': size, 'state': word_state}), self.canva.style)
 
         x = (constants.WIDTH - text.word.shape.width)/2
         layer2.setCursor(x, (constants.HEIGHT * constants.VERTICAL_ALIGN))
@@ -24,11 +32,6 @@ class DefaultAnimation(Animation):
         text.word.shape.y = layer2.cursor.y
 
         layer2.data.layout.set_text(text.word.content, -1)
-
-        if self.canva.state.current_word.current_frame <= constants.INTRO_THRESHOLD:
-            self.canva.state.current_word.size = self.canva.state.current_word.current_frame/constants.INTRO_THRESHOLD * constants.FONT_SIZE
-        else:
-            self.canva.state.current_word.state = WordState.COMPLETED
 
         if text.word.shape.width != text.final_shape.width:
             x = text.word.shape.x - text.final_shape.width/2 + text.word.shape.width/2
@@ -41,4 +44,6 @@ class DefaultAnimation(Animation):
         text.word.shape.y = y
         text.draw()
 
-        self.canva.compose(self.canva.frame)
+        bytes = self.canva.compose()
+        self.canva.dispose()
+        return bytes

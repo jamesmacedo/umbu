@@ -25,6 +25,7 @@ class Data:
 
 class Layer:
 
+    id: str
     cursor: Cursor
     state: LayoutState = None
     data: Data = None
@@ -38,7 +39,8 @@ class Layer:
     #     desc.set_weight(Pango.Weight.BOLD)
     #     layout.set_font_description(desc)
 
-    def __init__(self):
+    def __init__(self, id):
+        self.id = id
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, constants.WIDTH, constants.HEIGHT)
         ctx = cairo.Context(surface)
 
@@ -62,3 +64,6 @@ class Layer:
         self.data.context.set_operator(cairo.OPERATOR_CLEAR)
         self.data.context.paint()
         self.data.context.restore()
+
+    def dispose(self):
+        self.data.surface.flush()

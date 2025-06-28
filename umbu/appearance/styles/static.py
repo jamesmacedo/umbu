@@ -22,3 +22,5 @@ class StaticStyle(Style):
             layer.data.context.stroke()
         else:
             PangoCairo.show_layout(layer.data.context, layer.data.layout)
+
+        layer.data.surface.flush()

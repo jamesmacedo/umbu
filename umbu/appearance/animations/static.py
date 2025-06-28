@@ -10,14 +10,15 @@ class StaticAnimation(Animation):
     def setup(self):
         pass
 
-    def draw(self):
+    def draw(self, state):
 
         self.canva.clear()
 
-        layer = self.canva.createLayer()
+        layer = self.canva.createOrFindLayer("STAGE")
         layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
 
-        row = Row(layer, [Text(layer, self.canva.buffer, word.copy(update={"size": constants.FONT_SIZE, "state": WordState.ACTIVATED}), self.canva.style) for word in self.canva.state.current_chunk])
+        row = Row(layer, [Text(layer, self.canva.buffer, word.copy(update={"size": constants.FONT_SIZE, "state": WordState.ACTIVATED}), self.canva.style) for word in state.current_chunk])
         row.draw()
-
-        self.canva.compose(self.canva.frame)
+        bytes = self.canva.compose()
+        self.canva.dispose()
+        return bytes
