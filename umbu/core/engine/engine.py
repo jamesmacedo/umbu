@@ -177,12 +177,12 @@ class Engine:
         (
             ffmpeg
             .input(list_path, format='concat', safe=0)
-            .output(os.path.join(path, "overlay.mov"),
+            .output(os.path.join(path, "caption.mov"),
                     vcodec='copy',
                     )
             .overwrite_output()
             .run()
         )
 
-        print("✅ Video created with sucess:", os.path.join(path, "overlay.mov"))
-        return os.path.join(path, "output_final.mp4")
+        print("✅ Video created with sucess:", os.path.join(path, "caption.mov"))
+        return os.path.join(path, "caption.mov")
