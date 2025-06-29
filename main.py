@@ -8,4 +8,4 @@ engine = Engine()
 
 with open('debug/transcription.json', 'r') as f:
     data = json.load(f)
-    asyncio.run(engine.load(data).run("debug/frames", MinimalistAnimation, MinimalistStyle))
+    engine.load(data).run("debug/frames", MinimalistAnimation, MinimalistStyle)

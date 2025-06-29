@@ -133,7 +133,7 @@ class Engine:
         proc.stdin.close()
         proc.wait()
 
-    async def debug(self, path: str, classe, style):
+    def debug(self, path: str, classe, style):
 
         # if os.path.isdir(path) and not os.path.isfile(path):
         #     if os.listdir(path):
@@ -148,7 +148,7 @@ class Engine:
         # self.build(classe, style)
         # return Video.sequence(path)
 
-    async def run(self, path: str, classe, style):
+    def run(self, path: str, classe, style):
 
         # if os.path.isdir(path) and not os.path.isfile(path):
         #     if os.listdir(path):
