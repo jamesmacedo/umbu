@@ -3,7 +3,11 @@ from umbu.core.models.layout import WordState
 from umbu.core.engine.appearance import Style
 
 
-class DefaultStyle(Style):
+class ModernStyle(Style):
+
+    @staticmethod
+    def modify(text):
+        return text.upper()
 
     def draw(self, x, y, layer, word):
 

@@ -1,3 +1,3 @@
-from .default import DefaultAnimation
+from .modern import ModernAnimation
 from .minimalist import MinimalistAnimation
-from .fancy import FancyAnimation
+from .classic import ClassicAnimation

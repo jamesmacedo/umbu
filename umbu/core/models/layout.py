@@ -35,10 +35,13 @@ class Word(BaseModel):
 
 
 class LayoutState(BaseModel):
-    # previous_word: Word | None = None
-    # previous_chunk: List[Word] | None = None
+    previous_word: Word | None = None
+    previous_chunk: List[Word] | None = None
     current_word: Word | None
     current_chunk: List[Word] | None
+    next_chunk: List[Word] | None = None
+    next_word: Word | None
+
     # chunks: List[List[Word]]
     # duration: float = 0
     # total_frames: int = 0

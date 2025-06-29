@@ -3,6 +3,13 @@ from abc import ABC, abstractmethod
 
 class Style(ABC):
 
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def modify(text):
+        return text
+
     def getColorsRGB(self, value: str):
         value = value.lstrip('#')
         lv = len(value)

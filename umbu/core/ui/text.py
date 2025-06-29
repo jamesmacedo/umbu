@@ -29,6 +29,8 @@ class Text:
 
         self.setFont("Montserrant", constants.FONT_SIZE)
 
+        word.content = style.modify(word.content)
+
         buffer.data.layout.set_text(word.content, -1)
         buffer.data.context.set_source_rgb(1, 1, 1)
         ink_rect, logical_rect = buffer.data.layout.get_pixel_extents()

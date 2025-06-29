@@ -1,8 +1,5 @@
-import os
-import gc
-
 from umbu.core.canva.layer import Layer
-from umbu.core.models.layout import LayoutState, Word, Cursor
+from umbu.core.models.layout import LayoutState, Word
 
 from typing import List
 

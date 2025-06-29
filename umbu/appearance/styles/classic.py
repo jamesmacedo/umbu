@@ -3,7 +3,7 @@ from umbu.core.models.layout import WordState
 from umbu.core.engine.appearance import Style
 
 
-class FancyStyle(Style):
+class ClassicStyle(Style):
 
     def draw(self, x, y, layer, word):
 

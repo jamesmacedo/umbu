@@ -72,13 +72,16 @@ class Engine:
         serialized = []
         prev_end = 0.0
 
-        for chunk in self.chunks:
-            for word in chunk:
+        previous_chunk = None
 
-                # gap = word.transcription.start - prev_end
-                # if gap > 0:
-                #     silent_frames = math.ceil(gap * constants.FPS)
-                #     serialized.extend([{"word": None}] * silent_frames)
+        for ci, chunk in enumerate(self.chunks):
+            for wi, word in enumerate(chunk):
+
+                prev_chunk = self.chunks[ci - 1] if ci > 0 else None
+                next_chunk = self.chunks[ci + 1] if ci < len(self.chunks) - 1 else None
+
+                prev_word = chunk[wi - 1] if wi > 0 else None
+                next_word = chunk[wi + 1] if wi < len(chunk) - 1 else None
 
                 n_frames = math.ceil(
                     (word.transcription.end - word.transcription.start)
@@ -86,20 +89,29 @@ class Engine:
                 )
 
                 if word.transcription.start > prev_end:
-                    print("has gap")
                     gap = word.transcription.start - prev_end
                     for _ in range(math.ceil(gap * constants.FPS)):
                         serialized.append(
                             LayoutState(
+                                previous_word=None,
+                                previous_chunk=None,
                                 current_chunk=None,
-                                current_word=None
+                                current_word=None,
+                                next_word=None,
+                                next_chunk=None
                             ))
 
                 for i in range(0, n_frames):
                     serialized.append(
                         LayoutState(
+                            previous_word=prev_word,
+                            previous_chunk=prev_chunk,
+
                             current_chunk=chunk,
-                            current_word=word.copy(update={'total_frames': n_frames, 'current_frame': i})
+                            current_word=word.copy(update={'total_frames': n_frames, 'current_frame': i}),
+
+                            next_word=next_word,
+                            next_chunk=next_chunk
                         ))
 
                 prev_end = word.transcription.end
