@@ -14,6 +14,11 @@ class FancyAnimation(Animation):
 
         self.canva.clear(True)
 
+        if state.current_chunk is None:
+            bytes = self.canva.compose()
+            self.canva.dispose()
+            return bytes
+
         layer = self.canva.createOrFindLayer("BACKGROUND")
         layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))
         row = Row(layer, [Text(layer, self.canva.buffer, word.copy(update={"size": constants.FONT_SIZE}), self.canva.style) for word in state.current_chunk])

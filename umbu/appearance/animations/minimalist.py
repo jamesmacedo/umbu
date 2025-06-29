@@ -5,7 +5,7 @@ from umbu.core.models.layout import WordState
 from umbu.core.engine.appearance import Animation
 
 
-class StaticAnimation(Animation):
+class MinimalistAnimation(Animation):
 
     def setup(self):
         pass
@@ -13,6 +13,11 @@ class StaticAnimation(Animation):
     def draw(self, state):
 
         self.canva.clear()
+
+        if state.current_chunk is None:
+            bytes = self.canva.compose()
+            self.canva.dispose()
+            return bytes
 
         layer = self.canva.createOrFindLayer("STAGE")
         layer.setCursor(0, (constants.HEIGHT * constants.VERTICAL_ALIGN))

@@ -85,12 +85,24 @@ class Engine:
                     * constants.FPS
                 )
 
+                if word.transcription.start > prev_end:
+                    print("has gap")
+                    gap = word.transcription.start - prev_end
+                    for _ in range(math.ceil(gap * constants.FPS)):
+                        serialized.append(
+                            LayoutState(
+                                current_chunk=None,
+                                current_word=None
+                            ))
+
                 for i in range(0, n_frames):
                     serialized.append(
                         LayoutState(
                             current_chunk=chunk,
                             current_word=word.copy(update={'total_frames': n_frames, 'current_frame': i})
                         ))
+
+                prev_end = word.transcription.end
 
         return serialized
 
@@ -138,9 +150,12 @@ class Engine:
 
     async def run(self, path: str, classe, style):
 
+        # if os.path.isdir(path) and not os.path.isfile(path):
+        #     if os.listdir(path):
+        #         shutil.rmtree(path)
+
         if os.path.isdir(path):
             shutil.rmtree(path)
-
         os.makedirs(path)
 
         states = self._serialize_states()
@@ -150,6 +165,9 @@ class Engine:
         SEG = 500
         segments = [(i, min(i+SEG-1, total_frames-1))
                     for i in range(0, total_frames, SEG)]
+
+        # print(segments)
+        # return
 
         maxw = min(40, mp.cpu_count())
         with ProcessPoolExecutor(max_workers=maxw) as pool:

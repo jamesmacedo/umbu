@@ -14,6 +14,11 @@ class DefaultAnimation(Animation):
 
         self.canva.clear()
 
+        if state.current_chunk is None:
+            bytes = self.canva.compose()
+            self.canva.dispose()
+            return bytes
+
         layer2 = self.canva.createOrFindLayer("STAGE")
         word_state = WordState.ACTIVATED
 

@@ -3,7 +3,7 @@ from umbu.core.models.layout import WordState
 from umbu.core.engine.appearance import Style
 
 
-class StaticStyle(Style):
+class MinimalistStyle(Style):
 
     def draw(self, x, y, layer, word):
 
