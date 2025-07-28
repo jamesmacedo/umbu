@@ -50,20 +50,27 @@ class Engine:
     def load(self, transcription: List[Dict]):
         def create_chunk(arr: List[Any], size: int) -> List[List[Word]]:
             chunks: List[List[Word]] = []
-            for i in range(0, len(arr), size):
-                raw_chunk = arr[i:i + size]
+            i = 0
+            n = len(arr)
+            while i < n:
+                end = min(i + size, n)
+                while end < n and (arr[end].word.endswith('.') or arr[end].word.endswith(',')):
+                    end += 1
+
+                raw_chunk = arr[i:end]
                 item_chunk = [
                     Word(
                         transcription=val,
-                        content=val.word,
+                        content=val.word.replace('-', ''),
                         state=WordState.UNACTIVATED,
                         shape=Shape()
                     )
                     for val in raw_chunk
                 ]
                 chunks.append(item_chunk)
-            return chunks
+                i = end
 
+            return chunks
         self._transcription = [Transcription(**d) for d in transcription]
         self.chunks = create_chunk(self._transcription, self.chunk_size)
         return self
@@ -83,7 +90,7 @@ class Engine:
                 prev_word = chunk[wi - 1] if wi > 0 else None
                 next_word = chunk[wi + 1] if wi < len(chunk) - 1 else None
 
-                n_frames = math.ceil(
+                n_frames = math.floor(
                     (word.transcription.end - word.transcription.start)
                     * constants.FPS
                 )
