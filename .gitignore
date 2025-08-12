@@ -1,5 +1,6 @@
 frames/*
 debug/*
+custom/*
 
 __pycache__
 **/__pycache__

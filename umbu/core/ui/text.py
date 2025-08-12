@@ -4,7 +4,6 @@ import numpy as np
 from typing import List
 
 from umbu.core.models.layout import Word, Shape
-from gi.repository import Pango
 
 
 class Text:
@@ -13,44 +12,18 @@ class Text:
     final_shape: Shape
     style: type = None
 
-    def setFont(self, font: str = "", size: int = 10):
-        desc = Pango.FontDescription()
-        desc.set_family(font)
-        desc.set_size(size * Pango.SCALE)
-        desc.set_weight(Pango.Weight.BOLD)
-        self.layer.data.layout.set_font_description(desc)
-        self.buffer.data.layout.set_font_description(desc)
-
     def __init__(self, layer, buffer, word: Word, style: type):
         self.buffer = buffer
         self.layer = layer
 
         self.style = style
 
-        self.setFont("Montserrant", constants.FONT_SIZE)
-
         word.content = style.modify(word.content)
 
-        buffer.data.layout.set_text(word.content, -1)
-        buffer.data.context.set_source_rgb(1, 1, 1)
-        ink_rect, logical_rect = buffer.data.layout.get_pixel_extents()
+        final_shape, current_shape = style().setup(word, layer, buffer)
+        self.final_shape = final_shape
 
-        self.final_shape = Shape(
-            x=0,
-            y=0,
-            width=logical_rect.width,
-            height=logical_rect.height
-        )
-
-        self.setFont("Montserrant", word.size)
-
-        buffer.data.layout.set_text(word.content, -1)
-        buffer.data.context.set_source_rgb(1, 1, 1)
-        ink_rect, logical_rect = buffer.data.layout.get_pixel_extents()
-
-        word.shape.width = logical_rect.width
-        word.shape.height = logical_rect.height
-
+        word.shape = current_shape
         self.word = word
 
     def draw(self):

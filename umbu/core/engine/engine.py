@@ -39,6 +39,18 @@ class Engine:
 
         self._chunk_size = value
 
+        self._max_chars_per_chunk = 16  # ex.: 16 gera [payment, mortgage] [program]
+
+    @property
+    def max_chars_per_chunk(self) -> int | None:
+        return self._max_chars_per_chunk
+
+    @max_chars_per_chunk.setter
+    def max_chars_per_chunk(self, value: int | None):
+        if value is not None and value <= 0:
+            raise ValueError("max_chars_per_chunk deve ser positivo ou None")
+        self._max_chars_per_chunk = value
+
     @property
     def chunks(self) -> List[List[Transcription]]:
         return self._chunks
@@ -48,12 +60,36 @@ class Engine:
         self._chunks = c
 
     def load(self, transcription: List[Dict]):
+
+        max_longs_per_chunk = 2
+        long_len = 8
+        max_chars_per_chunk = 14
+
         def create_chunk(arr: List[Any], size: int) -> List[List[Word]]:
             chunks: List[List[Word]] = []
             i = 0
             n = len(arr)
             while i < n:
-                end = min(i + size, n)
+                end = i
+                long_count = 0
+                total_chars = 0
+
+                while end < n and (end - i) < size:
+                    raw = arr[end].word
+                    w = raw.replace('-', '')
+                    wlen = len(w)
+
+                    if max_chars_per_chunk is not None and (total_chars + wlen) > max_chars_per_chunk:
+                        break
+
+                    if wlen >= long_len and long_count >= max_longs_per_chunk:
+                        break
+
+                    if wlen >= long_len:
+                        long_count += 1
+                    total_chars += wlen
+                    end += 1
+
                 while end < n and (arr[end].word.endswith('.') or arr[end].word.endswith(',')):
                     end += 1
 
