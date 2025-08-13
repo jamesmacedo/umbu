@@ -61,9 +61,9 @@ class Engine:
 
     def load(self, transcription: List[Dict]):
 
-        max_longs_per_chunk = 2
+        max_longs_per_chunk = 4
         long_len = 8
-        max_chars_per_chunk = 14
+        max_chars_per_chunk = 20
 
         def create_chunk(arr: List[Any], size: int) -> List[List[Word]]:
             chunks: List[List[Word]] = []
