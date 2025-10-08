@@ -1,6 +1,6 @@
 [project]
 name = "umbu"
-version = "0.1.5"
+version = "0.1.7"
 description = "Open-source tool to automatically generate captions for your videos"
 authors = [
     {name = "James Yan"}
