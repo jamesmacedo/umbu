@@ -10,7 +10,7 @@ from umbu.core.canva.canva import Canva
 from umbu.core.canva.layer import Layer
 from umbu.core.models.transcription import Transcription
 from umbu.core.models.layout import Word, WordState, Shape
-from concurrent.futures import ProcessPoolExecutor
+from billiard.pool import Pool
 
 from typing import List, Any, Dict
 
@@ -224,22 +224,26 @@ class Engine:
         # print(segments)
         # return
 
-        maxw = min(40, mp.cpu_count())
-        with ProcessPoolExecutor(max_workers=maxw) as pool:
-            futs = []
+        # maxw = min(40, mp.cpu_count())
+        maxw = 4
+        with Pool(processes=maxw) as pool:
+            results = []
             for seg_id, (start, end) in enumerate(segments):
-                futs.append(
-                    pool.submit(
-                        self.render_segment,
-                        start,
-                        end,
-                        states[start:end+1],
-                        classe,
-                        style,
-                        os.path.join(path, f"seg_{seg_id:03d}.mov"))
-                )
-            for f in futs:
-                f.result()
+
+                args = (
+                    self.render_segment,
+                    start,
+                    end,
+                    states[start:end+1],
+                    classe,
+                    style,
+                    os.path.join(path, f"seg_{seg_id:03d}.mov"))
+
+                res = pool.apply_async(func=args[0], args=args[1:])
+                results.append(res)
+
+            for f in results:
+                f.get()
 
         segment_files = [f"seg_{i:03d}.mov" for i in range(len(segments))]
         list_path = os.path.join(path, "segments.txt")
