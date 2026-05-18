@@ -1,9 +1,11 @@
 frames/*
 debug/*
 custom/*
+output/*
 
 __pycache__
 **/__pycache__
 
 *.mov
 *.mp4
+*.png

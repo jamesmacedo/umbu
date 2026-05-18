@@ -4,26 +4,27 @@ import shutil
 import ffmpeg
 
 import multiprocessing as mp
+from umbu.components.base import Component
 import umbu.constants as constants
 
-from umbu.core.canva.canva import Canva
-from umbu.core.canva.layer import Layer
-from umbu.core.models.transcription import Transcription
-from umbu.core.models.layout import Word, WordState, Shape
+from loguru import logger
+
+from umbu.models.transcription import Transcription
+from umbu.models.layout import Word
+
+from umbu.components import Root, Row, Text
+
 from billiard.pool import Pool
 
 from typing import List, Any, Dict
 
-from umbu.core.models.layout import LayoutState, Word
+from umbu.models.layout import Word
+from umbu.render.cairo.render import CairoRenderer
 
 
 class Engine:
     _transcription: List[Transcription] = []
-
-    layout: Canva | None = None
-    buffer: Layer | None = None
-
-    frame_buffer = []
+    total_frames: int = 0
 
     def __init__(self):
         self._chunk_size = constants.CHUNK_SIZE
@@ -39,7 +40,8 @@ class Engine:
 
         self._chunk_size = value
 
-        self._max_chars_per_chunk = 16  # ex.: 16 gera [payment, mortgage] [program]
+        # ex.: 16 gera [payment, mortgage] [program]
+        self._max_chars_per_chunk = 16
 
     @property
     def max_chars_per_chunk(self) -> int | None:
@@ -64,6 +66,9 @@ class Engine:
         max_longs_per_chunk = 3
         long_len = 6
         max_chars_per_chunk = 16
+
+        self.total_frames = math.ceil(
+            transcription[-1]['end'] - transcription[0]['start'])*constants.FPS
 
         def create_chunk(arr: List[Any], size: int) -> List[List[Word]]:
             chunks: List[List[Word]] = []
@@ -92,18 +97,8 @@ class Engine:
 
                 while end < n and (arr[end].word.endswith('.') or arr[end].word.endswith(',')):
                     end += 1
-
                 raw_chunk = arr[i:end]
-                item_chunk = [
-                    Word(
-                        transcription=val,
-                        content=val.word.replace('-', ''),
-                        state=WordState.UNACTIVATED,
-                        shape=Shape()
-                    )
-                    for val in raw_chunk
-                ]
-                chunks.append(item_chunk)
+                chunks.append(raw_chunk)
                 i = end
 
             return chunks
@@ -111,59 +106,7 @@ class Engine:
         self.chunks = create_chunk(self._transcription, self.chunk_size)
         return self
 
-    def _serialize_states(self) -> list:
-        serialized = []
-        prev_end = 0.0
-
-        previous_chunk = None
-
-        for ci, chunk in enumerate(self.chunks):
-            for wi, word in enumerate(chunk):
-
-                prev_chunk = self.chunks[ci - 1] if ci > 0 else None
-                next_chunk = self.chunks[ci + 1] if ci < len(self.chunks) - 1 else None
-
-                prev_word = chunk[wi - 1] if wi > 0 else None
-                next_word = chunk[wi + 1] if wi < len(chunk) - 1 else None
-
-                n_frames = math.floor(
-                    (word.transcription.end - word.transcription.start)
-                    * constants.FPS
-                )
-
-                if word.transcription.start > prev_end:
-                    gap = word.transcription.start - prev_end
-                    for _ in range(math.ceil(gap * constants.FPS)):
-                        serialized.append(
-                            LayoutState(
-                                previous_word=None,
-                                previous_chunk=None,
-                                current_chunk=None,
-                                current_word=None,
-                                next_word=None,
-                                next_chunk=None
-                            ))
-
-                for i in range(0, n_frames):
-                    serialized.append(
-                        LayoutState(
-                            previous_word=prev_word,
-                            previous_chunk=prev_chunk,
-
-                            current_chunk=chunk,
-                            current_word=word.copy(update={'total_frames': n_frames, 'current_frame': i}),
-
-                            next_word=next_word,
-                            next_chunk=next_chunk
-                        ))
-
-                prev_end = word.transcription.end
-
-        return serialized
-
-    def render_segment(self, start_f, end_f, states, classe, style, outfile):
-
-        canva = Canva(style)
+    def render_segment(self, component, outfile):
 
         proc = (
             ffmpeg
@@ -174,36 +117,25 @@ class Engine:
                    r=constants.FPS)
             .output(outfile,
                     # TODO: check the differences between each of these codecs and pix format
-                    vcodec='qtrle', # qtrle
-                    pix_fmt='argb', # argb
+                    vcodec='qtrle',  # qtrle
+                    pix_fmt='argb',  # argb
                     movflags='+faststart')
             .overwrite_output()
             .run_async(pipe_stdin=True)
         )
 
-        for i in range(start_f, end_f + 1):
-            frame_bytes = classe(canva).draw(states[i - start_f])
-            proc.stdin.write(frame_bytes)
+        # for i in range(start_f, end_f + 1):
+        #     frame_bytes = renderer.render(states[i - start_f])
+        #     proc.stdin.write(frame_bytes)
 
         proc.stdin.close()
         proc.wait()
 
-    def debug(self, path: str, classe, style):
+    def test(self, component: Component):
+        renderer = CairoRenderer()
+        renderer.render(component)
 
-        # if os.path.isdir(path) and not os.path.isfile(path):
-        #     if os.listdir(path):
-        #         shutil.rmtree(path)
-
-        serialized = self._serialize_states()
-        canva = Canva(style)
-
-        for i, state in enumerate(serialized):
-            classe(canva).draw(state)
-
-        # self.build(classe, style)
-        # return Video.sequence(path)
-
-    def run(self, path: str, classe, style):
+    def run(self, path: str):
 
         # if os.path.isdir(path) and not os.path.isfile(path):
         #     if os.listdir(path):
@@ -213,30 +145,47 @@ class Engine:
             shutil.rmtree(path)
         os.makedirs(path)
 
-        states = self._serialize_states()
-        total_frames = len(states)
+        scene = Root(
+            # id="scene",
+            children=[
+                Row(
+                    children=[
+                        Text(content=item.word) for item in chunk
+                    ]
+                ) for chunk in self.chunks[:1]
+            ]
+        )
+
+        # for chunk in self.chunks:
+        #     row = Row()
+        #     row2 = Row()
+        #     for item in chunk:
+        #         text = Text(content=item.word)
+        #         row.add_children()
+        #     #
+        #     # row2.children.append(row)
+        #     # row2.children.append(row)
+        #     scene.set_child(row)
+        #     break
+
+        self.test(scene)
+
+        return
 
         # TODO: Pass the variable below through the method
         SEG = 500
-        segments = [(i, min(i+SEG-1, total_frames-1))
-                    for i in range(0, total_frames, SEG)]
+        segments = [(i, min(i+SEG-1, self.total_frames-1))
+                    for i in range(0, self.total_frames, SEG)]
 
-        # print(segments)
-        # return
-
-        # maxw = min(40, mp.cpu_count())
-        maxw = 4
+        maxw = min(4, mp.cpu_count())
+        # maxw = 4
         with Pool(processes=maxw) as pool:
             results = []
             for seg_id, (start, end) in enumerate(segments):
 
                 args = (
                     self.render_segment,
-                    start,
-                    end,
-                    states[start:end+1],
-                    classe,
-                    style,
+                    scene,
                     os.path.join(path, f"seg_{seg_id:03d}.mov"))
 
                 res = pool.apply_async(func=args[0], args=args[1:])
@@ -262,5 +211,6 @@ class Engine:
             .run()
         )
 
-        print("✅ Video created with sucess:", os.path.join(path, "caption.mov"))
+        print("✅ Video created with sucess:",
+              os.path.join(path, "caption.mov"))
         return os.path.join(path, "caption.mov")
