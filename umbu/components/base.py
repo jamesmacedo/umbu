@@ -18,6 +18,8 @@ class Component:
     start_frame: int = 0
     end_frame: int = 0
 
+    total_frames: int = 0
+
     opacity: float = 1.0
     scale: float = 1.0
     offset_x: float = 0.0
@@ -37,7 +39,7 @@ class Component:
 
     def update(self, current_frame):
         if self.animation is not None:
-            self.animation.count(self.end_frame).update(self, current_frame)
+            self.animation.count(self.total_frames).update(self, current_frame)
 
     def transform(self):
 

@@ -8,7 +8,7 @@ from typing import Optional, Dict
 class IAnimation(ABC):
 
     def count(self, frame_count: int):
-        self.frame_count = frame_count
+        self.total_frames = frame_count
         return self
 
     def ease_in_elastic(self, x: float):
@@ -35,7 +35,7 @@ class IAnimation(ABC):
         return start + (end - start) * factor
 
     def get_process(self, node, current_frame: int) -> float:
-        return (current_frame/self.frame_count)
+        return (current_frame/self.total_frames)
 
     @abstractmethod
     def update(self, node, current_frame):

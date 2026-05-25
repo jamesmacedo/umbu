@@ -69,10 +69,8 @@ class CairoRenderer(IRender):
         self.layer.clear()
 
     def setup(self, component):
-
-        component.set_position(x=(component.parent.canvas_width -
-                               component.width)/2, y=component.parent.canvas_height*0.8)
         component.measure(self.measurer)
+        component.set_position(x=(component.parent.canvas_width - component.width)/2, y=component.parent.canvas_height*0.8)
         component.arrange()
 
     def render(self, component: Component):

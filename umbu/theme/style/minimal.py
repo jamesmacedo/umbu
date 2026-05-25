@@ -6,7 +6,10 @@ class MinimalAnimation(IAnimation):
 
         initial_frames = 5
 
-        if self.get_process(node, current_frame) == 1:
+        process = self.get_process(node, current_frame)
+
+        print("process: ", process)
+        if process == 1:
             node.state = StyleState.DONE
             return
 
@@ -21,7 +24,7 @@ class MinimalAnimation(IAnimation):
             node.state = StyleState.ACTIVE
 
         if node.state != StyleState.DONE:
-            factor = self.ease_out_bounce(self.get_process(node, current_frame))
+            factor = self.ease_in_elastic(self.get_process(node, current_frame))
             node.y = self.lerp(node.y, node.y-10, factor)
 
 
@@ -41,7 +44,7 @@ minimal = ComponentStyle(
         ),
 
         StyleState.DONE: TextStyle(
-            color="#999999"
+            color="#FF00FF"
         )
     }
 )
