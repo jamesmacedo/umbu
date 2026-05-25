@@ -5,3 +5,4 @@ class Transcription(BaseModel):
     word: str
     start: float
     end: float
+    total_frames: int = 0

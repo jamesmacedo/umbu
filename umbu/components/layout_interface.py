@@ -12,9 +12,7 @@ class ILayout:
             for child in component.children:
                 child.x = component.x
                 child.y = component.y
-                print("relative x: ", component.x, "relative y: ", component.y)
 
     @abstractmethod
-    def arrange(self, component: 'Component', par_x: float, par_y: float):
-        component.x = par_x + component.x
-        component.y = par_y + component.y
+    def arrange(self, component: 'Component'):
+        pass

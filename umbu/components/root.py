@@ -3,23 +3,21 @@ from umbu.components.row import Row
 import umbu.constants as constants
 from umbu.render.measurer_interface import IMeasurer
 
-from pydantic import Field
-
 from .base import Component
 from typing import Optional
-from typing import List
 
 
 class RootLayout(ILayout):
     def measure(self, component, measurer:  IMeasurer):
+        component.width = 0
         for child in component.children:
             child.measure(measurer)
             component.width += child.width
 
-    def arrange(self, component, par_x: float, par_y: float):
+    def arrange(self, component):
         for child in component.children:
-            child.arrange(par_x, par_y)
-        super().arrange(component, par_x, par_y)
+            child.arrange()
+        # super().arrange(component, par_x, par_y)
 
 
 class Root(Component):
@@ -30,13 +28,23 @@ class Root(Component):
     canvas_width: int = constants.WIDTH
     canvas_height: int = constants.HEIGHT
 
-    layout_type: type[ILayout] = RootLayout
-
-    children: List['Component'] = Field(default_factory=list)
+    layout: ILayout = RootLayout()
 
     def __init__(self, children):
+        for child in children:
+            child.parent = self
         self.children = children
+
+    def measure(self, measurer: IMeasurer):
+        self.layout.measure(self, measurer)
+
+    def arrange(self):
+        self.layout.arrange(self)
 
     def set_position(self, x: float, y: float):
         self.x = x
         self.y = y
+
+    def draw(self, renderer: 'IRender'):
+        for child in self.children:
+            child.draw(renderer)

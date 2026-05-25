@@ -59,10 +59,15 @@ class Layer:
         self.data.context.paint()
 
     def clear(self):
-        self.data.context.save()
-        self.data.context.set_operator(cairo.OPERATOR_CLEAR)
-        self.data.context.paint()
-        self.data.context.restore()
+        ctx = self.data.context 
+
+        ctx.save()
+
+        ctx.set_operator(cairo.OPERATOR_SOURCE)
+        ctx.set_source_rgba(0, 0, 0, 0)
+        ctx.paint()
+
+        ctx.restore()
 
     def get_data(self):
         return self.data.surface.get_data()

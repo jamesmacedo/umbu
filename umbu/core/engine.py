@@ -21,6 +21,11 @@ from typing import List, Any, Dict
 from umbu.models.layout import Word
 from umbu.render.cairo.render import CairoRenderer
 
+from pydantic import BaseModel
+
+class Chunk(BaseModel):
+    total_frames: int = 0
+    words: list[Transcription] = []
 
 class Engine:
     _transcription: List[Transcription] = []
@@ -54,11 +59,11 @@ class Engine:
         self._max_chars_per_chunk = value
 
     @property
-    def chunks(self) -> List[List[Transcription]]:
+    def chunks(self) -> List[Chunk]:
         return self._chunks
 
     @chunks.setter
-    def chunks(self, c) -> List[List[Transcription]]:
+    def chunks(self, c):
         self._chunks = c
 
     def load(self, transcription: List[Dict]):
@@ -70,8 +75,8 @@ class Engine:
         self.total_frames = math.ceil(
             transcription[-1]['end'] - transcription[0]['start'])*constants.FPS
 
-        def create_chunk(arr: List[Any], size: int) -> List[List[Word]]:
-            chunks: List[List[Word]] = []
+        def create_chunk(arr: List[Any], size: int) -> List[Chunk]:
+            chunks: List[Chunk] = []
             i = 0
             n = len(arr)
             while i < n:
@@ -98,16 +103,19 @@ class Engine:
                 while end < n and (arr[end].word.endswith('.') or arr[end].word.endswith(',')):
                     end += 1
                 raw_chunk = arr[i:end]
-                chunks.append(raw_chunk)
+                chunks.append(Chunk(words=raw_chunk, total_frames=sum(chunk.total_frames for chunk in raw_chunk)))
                 i = end
 
             return chunks
-        self._transcription = [Transcription(**d) for d in transcription]
+
+        self._transcription = [Transcription(**{'total_frames': math.ceil((d['end'] - d['start'])*constants.FPS)}|d) for d in transcription]
         self.chunks = create_chunk(self._transcription, self.chunk_size)
         return self
 
-    def render_segment(self, component, outfile):
+    def render_segment(self, row,outfile: str):
 
+        renderer = CairoRenderer()
+        renderer.setup(row)
         proc = (
             ffmpeg
             .input('pipe:',
@@ -124,9 +132,13 @@ class Engine:
             .run_async(pipe_stdin=True)
         )
 
-        # for i in range(start_f, end_f + 1):
-        #     frame_bytes = renderer.render(states[i - start_f])
-        #     proc.stdin.write(frame_bytes)
+        # for i in range(row.start_frame, row.end_frame + 1):
+        for text in row.children: 
+            for j in range(text.total_frames + 1):
+                proc.stdin.write(renderer.render(row))
+                renderer.setup(row)
+                text.update(j)
+            # row.update(i)
 
         proc.stdin.close()
         proc.wait()
@@ -137,55 +149,46 @@ class Engine:
 
     def run(self, path: str):
 
-        # if os.path.isdir(path) and not os.path.isfile(path):
-        #     if os.listdir(path):
-        #         shutil.rmtree(path)
-
         if os.path.isdir(path):
             shutil.rmtree(path)
         os.makedirs(path)
 
+        t_start_chunk = self.chunks[0].words[0].start if self.chunks[0].words else 0
+
         scene = Root(
-            # id="scene",
             children=[
                 Row(
+                    total_frames=chunk.total_frames,
+                    start_frame=0,
+                    end_frame=chunk.total_frames,
                     children=[
-                        Text(content=item.word) for item in chunk
+                        Text(
+                            content=item.word,
+                            total_frames=item.total_frames,
+                            start_frame=math.ceil((item.start - t_start_chunk) * constants.FPS),
+                            end_frame=math.ceil((item.end - t_start_chunk) * constants.FPS),
+                        ) for item in chunk.words
                     ]
-                ) for chunk in self.chunks[:1]
+                ) for chunk in self.chunks[:3]
             ]
         )
 
-        # for chunk in self.chunks:
-        #     row = Row()
-        #     row2 = Row()
-        #     for item in chunk:
-        #         text = Text(content=item.word)
-        #         row.add_children()
-        #     #
-        #     # row2.children.append(row)
-        #     # row2.children.append(row)
-        #     scene.set_child(row)
-        #     break
-
-        self.test(scene)
-
-        return
-
         # TODO: Pass the variable below through the method
-        SEG = 500
-        segments = [(i, min(i+SEG-1, self.total_frames-1))
-                    for i in range(0, self.total_frames, SEG)]
+        # SEG = 500
+        # segments = [(i, min(i+SEG-1, self.total_frames-1))
+        #             for i in range(0, self.total_frames, SEG)]
 
-        maxw = min(4, mp.cpu_count())
-        # maxw = 4
+        # SEG = 40 
+        # segments = [scene.children[i:i + SEG] for i in range(0, len(scene.children), SEG)]
+
+        # maxw = min(4, mp.cpu_count())
+        maxw = 4
         with Pool(processes=maxw) as pool:
             results = []
-            for seg_id, (start, end) in enumerate(segments):
-
+            for seg_id, row in enumerate(scene.children):
                 args = (
                     self.render_segment,
-                    scene,
+                    row,
                     os.path.join(path, f"seg_{seg_id:03d}.mov"))
 
                 res = pool.apply_async(func=args[0], args=args[1:])
@@ -194,7 +197,7 @@ class Engine:
             for f in results:
                 f.get()
 
-        segment_files = [f"seg_{i:03d}.mov" for i in range(len(segments))]
+        segment_files = [f"seg_{i:03d}.mov" for i in range(len(scene.children))]
         list_path = os.path.join(path, "segments.txt")
 
         with open(list_path, "w", encoding="utf8") as f:
