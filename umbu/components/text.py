@@ -1,11 +1,10 @@
-from umbu.components.layout_interface import ILayout
+from umbu.components.layout_interface import Layout
 from umbu.render.measurer_interface import IMeasurer
-from umbu.theme.style.interface import ComponentStyle, IAnimation, StyleState
-from umbu.theme.style.minimal import MinimalAnimation, minimal 
+from umbu.theme.style.interface import Style, Animation, StyleState
 from .base import Component
 
 
-class TextLayout(ILayout):
+class TextLayout(Layout):
     def measure(self, component: 'Component', measurer:  IMeasurer):
         size = measurer.measure(component)
         component.width = size[0]
@@ -21,16 +20,14 @@ class Text(Component):
     start_time: float = 0.0
     end_time: float = 0.0
 
-    animation: IAnimation | None = MinimalAnimation()
-
-    layout: ILayout = TextLayout()
-
-    style: ComponentStyle  = minimal 
+    style: Style
+    layout: Layout = TextLayout()
 
     state: StyleState = StyleState.INACTIVE
 
-    def __init__(self, content: str, start_frame, end_frame, total_frames):
+    def __init__(self, style: Style, content: str, start_frame, end_frame, total_frames):
 
+        self.style = style
         self. total_frames = total_frames
         self.start_frame = start_frame
         self.end_frame = end_frame

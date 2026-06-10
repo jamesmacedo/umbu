@@ -18,6 +18,7 @@ dependencies = [
     "click>=8.3.3",
     "faster-whisper>=1.2.1",
     "loguru>=0.7.3",
+    "pygobject-stubs>=2.16.0",
 ]
 package-mode = true
 packages = [
@@ -35,6 +36,9 @@ packages = ["umbu"]
 [project.scripts]
 produce = "cli.produce:run"
 transcribe = "cli.produce:transcribe"
+
+[tool.uv]
+config-settings-package = { pygobject-stubs = { config = "Gtk3,Gdk3,Soup2" } }
 
 [tool.pyright]
 exclude = [

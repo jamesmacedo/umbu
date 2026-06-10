@@ -2,8 +2,8 @@ import click
 import json
 from umbu.core.engine import Engine
 from umbu.core.transcriber import Transcriber
-# from umbu.theme.animations import ModernAnimation, ClassicAnimation
-# from umbu.appearance.styles import ModernStyle, ClassicStyle
+from umbu.theme.style.minimal import minimal  
+
 
 
 @click.command()
@@ -22,4 +22,4 @@ def run(file: str):
 
     with open("output/saida.json") as f:
         engine = Engine()
-        engine.load(json.load(f)).run("debug/frames")
+        engine.load(json.load(f), style=minimal).run("debug/frames")

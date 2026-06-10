@@ -1,14 +1,14 @@
-from umbu.components.layout_interface import ILayout
+from umbu.components.layout_interface import Layout
 from pydantic import Field
 
 from umbu.render.measurer_interface import IMeasurer
-from umbu.theme.style.interface import IAnimation
+from umbu.theme.style.interface import Animation
 
 from .base import Component
 from typing import List
 
 
-class RowLayout(ILayout):
+class RowLayout(Layout):
 
     def measure(self, component: 'RowComponent', measurer: IMeasurer):
         component.width = 0
@@ -42,9 +42,9 @@ class Row(Component):
 
     spacing: float = 10
 
-    layout: ILayout = RowLayout()
+    layout: Layout = RowLayout()
 
-    animation: IAnimation|None = None 
+    animation: Animation|None = None 
 
     parent: type['Component']
 

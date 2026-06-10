@@ -1,6 +1,6 @@
-from umbu.components.layout_interface import ILayout
+from umbu.components.layout_interface import Layout
 from umbu.render.measurer_interface import IMeasurer
-from umbu.theme.style.interface import IAnimation
+from umbu.theme.style.interface import Animation, Style
 
 from pydantic import Field
 from typing import List
@@ -29,17 +29,18 @@ class Component:
     world_y: float = 0
 
     parent: type['Component']
-
-    animation: IAnimation | None
-    layout: ILayout
+    
+    style: Style
+    animation: Animation | None
+    layout: Layout
 
     active: bool = False
     children: List['Component'] = [] 
 
 
     def update(self, current_frame):
-        if self.animation is not None:
-            self.animation.count(self.total_frames).update(self, current_frame)
+        if self.style.animation.text is not None:
+            self.style.animation.text.count(self.total_frames).update(self, current_frame)
 
     def transform(self):
 

@@ -3,14 +3,10 @@ import math
 import shutil
 import ffmpeg
 
-import multiprocessing as mp
 from umbu.components.base import Component
 import umbu.constants as constants
 
-from loguru import logger
-
 from umbu.models.transcription import Transcription
-from umbu.models.layout import Word
 
 from umbu.components import Root, Row, Text
 
@@ -18,10 +14,10 @@ from billiard.pool import Pool
 
 from typing import List, Any, Dict
 
-from umbu.models.layout import Word
 from umbu.render.cairo.render import CairoRenderer
-
 from pydantic import BaseModel
+from umbu.theme.style.interface import Style, Animation
+from umbu.theme.style.minimal import minimal
 
 class Chunk(BaseModel):
     total_frames: int = 0
@@ -30,6 +26,8 @@ class Chunk(BaseModel):
 class Engine:
     _transcription: List[Transcription] = []
     total_frames: int = 0
+    animation: Animation
+    style: Style 
 
     def __init__(self):
         self._chunk_size = constants.CHUNK_SIZE
@@ -45,7 +43,6 @@ class Engine:
 
         self._chunk_size = value
 
-        # ex.: 16 gera [payment, mortgage] [program]
         self._max_chars_per_chunk = 16
 
     @property
@@ -66,7 +63,9 @@ class Engine:
     def chunks(self, c):
         self._chunks = c
 
-    def load(self, transcription: List[Dict]):
+    def load(self, transcription: List[Dict], style: Style):
+
+        self.style = style
 
         max_longs_per_chunk = 3
         long_len = 6
@@ -163,6 +162,7 @@ class Engine:
                     end_frame=chunk.total_frames,
                     children=[
                         Text(
+                            style=self.style,
                             content=item.word,
                             total_frames=item.total_frames,
                             start_frame=math.ceil((item.start - t_start_chunk) * constants.FPS),

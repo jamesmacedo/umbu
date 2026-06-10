@@ -1,8 +1,10 @@
 import gi
+import math
 
 from umbu.components.base import Component
 from umbu.components import Row, Text
 from umbu.components import Row, Text
+from umbu.render.cairo.font import FontCache
 from umbu.render.measurer_interface import IMeasurer
 from umbu.render.render_interface import IRender
 from umbu.theme.style.interface import StyleState
@@ -20,20 +22,15 @@ class CairoMeasurer(IMeasurer):
 
     def __init__(self, layout):
         self.buffer = layout
+        self.font = FontCache()
 
     def measure(self, component: Text):
-        resolved_style = component.style.resolve(StyleState.ACTIVE)
+        style = component.style.resolve(StyleState.ACTIVE)
 
-        desc = Pango.FontDescription()
-
-        desc.set_family(resolved_style.font_family)
-        desc.set_size(resolved_style.font_size * Pango.SCALE)
-
-        if resolved_style.weight == "bold":
-            desc.set_weight(Pango.Weight.BOLD)
+        font = self.font.get_font_description(style.text, component.scale)
 
         self.buffer.data.layout.set_text(component.content, -1)
-        self.buffer.data.layout.set_font_description(desc)
+        self.buffer.data.layout.set_font_description(font)
         self.buffer.data.context.set_source_rgb(0, 1, 1)
 
         _, logical_rect = self.buffer.data.layout.get_pixel_extents()
@@ -42,11 +39,13 @@ class CairoMeasurer(IMeasurer):
 
 
 class CairoRenderer(IRender):
-    layers: List[Layer] = []
     layer: Layer
     buffer: Layer
+    fonts: dict = {}
 
     def __init__(self):
+        self.font = FontCache()
+
         self.buffer = Layer("BUFFER")
         self.layer = Layer("COMPOSER")
         self.measurer = CairoMeasurer(self.buffer)
@@ -82,6 +81,7 @@ class CairoRenderer(IRender):
         # return self.layer.data.surface.write_to_png("output.png")
 
     def draw_row(self, row: Row):
+        return
 
         ctx = self.layer.data.context
 
@@ -94,37 +94,99 @@ class CairoRenderer(IRender):
 
         ctx.restore()
 
+    def draw_container(self, text, style):
+
+        ctx = self.layer.data.context
+        layout = self.layer.data.layout
+        
+        ctx.save()
+
+        radius = style.container.border_radius
+        width, height = (text.width * style.container.scale),(text.height * style.container.scale) 
+
+        x, y = text.world_x + style.container.x, text.world_y + style.container.y
+
+        # x, y = x - width / 2, y - height / 2
+
+        #TODO: custom border radius for each corner
+        tl = radius
+        tr = radius
+        br = radius
+        bl = radius
+
+        ctx.new_sub_path()
+
+        ctx.move_to(x + tl, y)
+
+        ctx.line_to(x + width - tr, y)
+        ctx.arc(
+            x + width - tr,
+            y + tr,
+            tr,
+            -math.pi / 2,
+            0
+        )
+
+        ctx.line_to(x + width, y + height - br)
+        ctx.arc(
+            x + width - br,
+            y + height - br,
+            br,
+            0,
+            math.pi / 2
+        )
+
+        ctx.line_to(x + bl, y + height)
+        ctx.arc(
+            x + bl,
+            y + height - bl,
+            bl,
+            math.pi / 2,
+            math.pi
+        )
+
+        ctx.line_to(x, y + tl)
+        ctx.arc(
+            x + tl,
+            y + tl,
+            tl,
+            math.pi,
+            3 * math.pi / 2
+        )
+
+        ctx.set_source_rgb(*self._hex_to_rgb(style.container.color))
+        ctx.fill()
+
+        ctx.restore()
 
     def draw_text(self, text: Text):
 
         style = text.style.resolve(text.state)
 
-        desc = Pango.FontDescription()
-        desc.set_family(style.font_family)
-        desc.set_size((style.font_size * Pango.SCALE) * text.scale)
+        if style.container:
+            self.draw_container(text, style)
 
         ctx = self.layer.data.context
         layout = self.layer.data.layout
 
-        if style.weight == "bold":
-            desc.set_weight(Pango.Weight.BOLD)
+        font = self.font.get_font_description(style.text, text.scale)
 
         ctx.move_to(text.world_x, text.world_y)
         
-        layout.set_font_description(desc)
+        layout.set_font_description(font)
         layout.set_text(text.content, -1)
 
-        if style.outline_width > 0:
-            ctx.set_source_rgb(*self._hex_to_rgb(style.color))
-            ctx.set_line_width(style.outline_width)
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
+
+        if style.text.outline_width > 0:
+            ctx.set_source_rgb(*self._hex_to_rgb(style.text.outline_color))
+            ctx.set_line_width(style.text.outline_width)
             PangoCairo.layout_path(ctx, layout) 
             ctx.stroke_preserve()
-            ctx.set_source_rgb(*self._hex_to_rgb(style.color))
+            ctx.set_source_rgb(*self._hex_to_rgb(style.text.color))
             ctx.fill()
             return
 
-        ctx.set_source_rgb(*self._hex_to_rgb(style.color))
-
-        PangoCairo.update_layout(
-            ctx, layout)
-        PangoCairo.show_layout(ctx, layout)
+        ctx.set_source_rgb(*self._hex_to_rgb(style.text.color))
+        ctx.fill()

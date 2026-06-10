@@ -1,4 +1,4 @@
-from umbu.components.layout_interface import ILayout
+from umbu.components.layout_interface import Layout
 from umbu.components.row import Row
 import umbu.constants as constants
 from umbu.render.measurer_interface import IMeasurer
@@ -7,7 +7,7 @@ from .base import Component
 from typing import Optional
 
 
-class RootLayout(ILayout):
+class RootLayout(Layout):
     def measure(self, component, measurer:  IMeasurer):
         component.width = 0
         for child in component.children:
@@ -28,7 +28,7 @@ class Root(Component):
     canvas_width: int = constants.WIDTH
     canvas_height: int = constants.HEIGHT
 
-    layout: ILayout = RootLayout()
+    layout: Layout = RootLayout()
 
     def __init__(self, children):
         for child in children:

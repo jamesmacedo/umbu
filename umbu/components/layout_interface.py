@@ -4,7 +4,7 @@ from abc import abstractmethod
 from umbu.render.measurer_interface import IMeasurer
 
 
-class ILayout:
+class Layout:
 
     @abstractmethod
     def measure(self, component: 'Component', measurer: IMeasurer):

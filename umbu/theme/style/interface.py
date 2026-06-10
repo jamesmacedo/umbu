@@ -2,10 +2,11 @@ import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from enum import Enum
-from typing import Optional, Dict
+from typing import Container, Optional, Dict
 
 
-class IAnimation(ABC):
+
+class Animation(ABC):
 
     def count(self, frame_count: int):
         self.total_frames = frame_count
@@ -50,39 +51,92 @@ class StyleState(Enum):
 
 
 @dataclass
+class ContainerStyle:
+
+    width: float = 1.0 # percentage 0.0 to 1.0
+    height: float = 1.0 # percentage 0.0 to 1.0
+
+    scale: float = 1.0
+
+    x: float = 0 
+    y: float = 0 
+
+    padding_top: float = 0.0
+    padding_right: float = 0.0
+    padding_bottom: float = 0.0
+    padding_left: float = 0.0
+
+    margin_top: float = 0.0
+    margin_right: float = 0.0
+    margin_bottom: float = 0.0
+    margin_left: float = 0.0
+
+    color: str | None = None
+    opacity: float = 1.0
+
+    border_color: str | None = None
+    border_width: float = 0.0
+    border_radius: float = 10.0
+
+    shadow_color: str | None = None
+    shadow_blur: float = 0.0
+    shadow_offset_x: float = 0.0
+    shadow_offset_y: float = 0.0
+
+    align_horizontal: str = "center"  # left, center, right
+    align_vertical: str = "center"    # top, center, bottom
+
+@dataclass
 class TextStyle:
     font_family: str = "Montserrat"
     font_size: float = 40.0
 
-    color: str = "#FFFFFF"
+    color: str = "#00FF00"
     weight: str = "bold"
 
+    outline_color: str = "#FFFFFF"
     outline_width: float = 0.0
     opacity: float = 1.0
 
 
 @dataclass
-class ComponentStyle:
-    base: TextStyle = field(default_factory=TextStyle)
+class StyleData:
+    text: TextStyle 
+    container: ContainerStyle|None = None
 
-    states: Dict[StyleState, TextStyle] = field(default_factory=dict)
 
-    def merge_styles(self, base: TextStyle, override: TextStyle) -> TextStyle:
-        data = asdict(base)
+@dataclass
+class AnimationData:
+    text: Animation|None = None
+    container: Animation|None = None
 
-        for field_name, field_def in override.__dataclass_fields__.items():
-            override_value = getattr(override, field_name)
-            default_value = field_def.default
 
-            if override_value != default_value:
-                data[field_name] = override_value
+@dataclass
+class Style:
+    spacing: float = 10
 
-        return TextStyle(**data)
+    states: Dict[StyleState, StyleData] = field(default_factory=dict)
+    animation: AnimationData = field(default_factory=AnimationData)
 
-    def resolve(self, state: StyleState) -> TextStyle:
+    def compare(self, default: dict, new: dict):
+        for field, value in default.items():
+            override_value = new[field]
+            if override_value != value:
+                new[field] = override_value
+        return new
+
+    def resolve(self, state: StyleState) -> StyleData:
         state_style = self.states.get(state)
 
-        if not state_style:
-            return self.base
+        if state_style is None:
+            return StyleData(text=TextStyle())
 
-        return self.merge_styles(self.base, state_style)
+        return StyleData(
+            text=TextStyle(**self.compare(asdict(TextStyle()), asdict(state_style.text))),
+            container=ContainerStyle(**self.compare(asdict(ContainerStyle()), asdict(state_style.container))) if state_style.container != None else None,
+        )
+
+        # if not state_style:
+        #     return default_style 
+        #
+        # return self.merge_styles(default_style, state_style)
