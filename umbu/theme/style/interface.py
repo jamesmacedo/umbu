@@ -48,6 +48,9 @@ class StyleState(Enum):
     INACTIVE = "inactive"
     DONE = "done"
 
+    # Use this state in case you don't what to vary the text style
+    BASE = "base"
+
 
 @dataclass
 class ContainerStyle:
@@ -149,7 +152,11 @@ class Style:
         return type(default)(**merged)
 
     def resolve(self, component: 'Text', state: StyleState) -> StyleData:
-        state_style = self.states.get(state)
+
+        if StyleState.BASE in self.states:
+            state_style = self.states.get(StyleState.BASE)
+        else: 
+            state_style = self.states.get(state)
 
         if state_style is None:
             return StyleData(text=TextStyle())
