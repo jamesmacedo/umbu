@@ -1,6 +1,6 @@
 import math
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, is_dataclass, fields
 from enum import Enum
 from typing import Container, Optional, Dict
 
@@ -86,6 +86,15 @@ class ContainerStyle:
     align_vertical: str = "center"    # top, center, bottom
 
 @dataclass
+class ShadowStyle:
+    offset_x: float = 2
+    offset_y: float = 2
+    color: str = "#00000000" # hex with alpha
+    
+    #TODO: implement gaussian blur
+    blur: float = 0
+
+@dataclass
 class TextStyle:
     font_family: str = "Montserrat"
     font_size: float = 40.0
@@ -96,6 +105,8 @@ class TextStyle:
     outline_color: str = "#FFFFFF"
     outline_width: float = 0.0
     opacity: float = 1.0
+
+    shadow: ShadowStyle|None = None
 
 
 @dataclass
@@ -111,12 +122,31 @@ class Style:
     states: Dict[StyleState, StyleData] = field(default_factory=dict)
     animation: Animation|None = None 
 
-    def compare(self, default: dict, new: dict):
-        for field, value in default.items():
-            override_value = new[field]
-            if override_value != value:
-                new[field] = override_value
-        return new
+    def compare(self, default, override):
+        if override is None:
+            return default
+
+        if not is_dataclass(default):
+            return override
+
+        merged = {}
+
+        for field in fields(default):
+            default_value = getattr(default, field.name)
+            override_value = getattr(override, field.name)
+
+            if override_value is None:
+                merged[field.name] = default_value
+
+            elif is_dataclass(default_value):
+                merged[field.name] = self.compare(
+                    default_value,
+                    override_value
+                )
+            else:
+                merged[field.name] = override_value
+
+        return type(default)(**merged)
 
     def resolve(self, component: 'Text', state: StyleState) -> StyleData:
         state_style = self.states.get(state)
@@ -125,8 +155,8 @@ class Style:
             return StyleData(text=TextStyle())
 
         animated = StyleData(
-            text=TextStyle(**self.compare(asdict(TextStyle()), asdict(state_style.text))),
-            container=ContainerStyle(**self.compare(asdict(ContainerStyle()), asdict(state_style.container))) if state_style.container != None else None,
+            text=self.compare(TextStyle(), state_style.text),
+            container=self.compare(ContainerStyle(), state_style.container) if state_style.container != None else None,
         ) 
 
         component.animated = animated

@@ -1,4 +1,9 @@
+import hashlib
+import json
+from dataclasses import asdict
+
 from gi.repository import Pango, PangoCairo, PangoFT2
+
 
 class FontCache:
 
