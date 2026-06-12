@@ -1,6 +1,6 @@
 from umbu.components.layout_interface import Layout
 from umbu.render.measurer_interface import IMeasurer
-from umbu.theme.style.interface import Style, Animation, StyleState
+from umbu.theme.style.interface import Style, StyleData, StyleState
 from .base import Component
 
 
@@ -21,13 +21,15 @@ class Text(Component):
     end_time: float = 0.0
 
     style: Style
+    animated: StyleData
+
     layout: Layout = TextLayout()
 
     state: StyleState = StyleState.INACTIVE
 
     def __init__(self, style: Style, content: str, start_frame, end_frame, total_frames):
 
-        self.style = style
+        self.style = style 
         self. total_frames = total_frames
         self.start_frame = start_frame
         self.end_frame = end_frame

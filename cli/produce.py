@@ -2,7 +2,7 @@ import click
 import json
 from umbu.core.engine import Engine
 from umbu.core.transcriber import Transcriber
-from umbu.theme.style.minimal import minimal  
+from umbu.theme.style.minimal_yellow import minimal_yellow
 
 
 
@@ -17,9 +17,6 @@ def transcribe(file: str, output: str):
 @click.command()
 @click.option('-f', '--file', required=True, help="File to produce")
 def run(file: str):
-    # transcriber = Transcriber()
-    # transcriber.run(file)
-
     with open("output/saida.json") as f:
         engine = Engine()
-        engine.load(json.load(f), style=minimal).run("debug/frames")
+        engine.load(json.load(f), style=minimal_yellow).run("debug/frames")

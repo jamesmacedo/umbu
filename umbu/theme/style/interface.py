@@ -5,7 +5,6 @@ from enum import Enum
 from typing import Container, Optional, Dict
 
 
-
 class Animation(ABC):
 
     def count(self, frame_count: int):
@@ -106,17 +105,11 @@ class StyleData:
 
 
 @dataclass
-class AnimationData:
-    text: Animation|None = None
-    container: Animation|None = None
-
-
-@dataclass
 class Style:
     spacing: float = 10
 
     states: Dict[StyleState, StyleData] = field(default_factory=dict)
-    animation: AnimationData = field(default_factory=AnimationData)
+    animation: Animation|None = None 
 
     def compare(self, default: dict, new: dict):
         for field, value in default.items():
@@ -125,18 +118,17 @@ class Style:
                 new[field] = override_value
         return new
 
-    def resolve(self, state: StyleState) -> StyleData:
+    def resolve(self, component: 'Text', state: StyleState) -> StyleData:
         state_style = self.states.get(state)
 
         if state_style is None:
             return StyleData(text=TextStyle())
 
-        return StyleData(
+        animated = StyleData(
             text=TextStyle(**self.compare(asdict(TextStyle()), asdict(state_style.text))),
             container=ContainerStyle(**self.compare(asdict(ContainerStyle()), asdict(state_style.container))) if state_style.container != None else None,
-        )
+        ) 
 
-        # if not state_style:
-        #     return default_style 
-        #
-        # return self.merge_styles(default_style, state_style)
+        component.animated = animated
+
+        return animated

@@ -25,7 +25,7 @@ class CairoMeasurer(IMeasurer):
         self.font = FontCache()
 
     def measure(self, component: Text):
-        style = component.style.resolve(StyleState.ACTIVE)
+        style = component.style.resolve(component, StyleState.ACTIVE)
 
         font = self.font.get_font_description(style.text, component.scale)
 
@@ -161,10 +161,10 @@ class CairoRenderer(IRender):
 
     def draw_text(self, text: Text):
 
-        style = text.style.resolve(text.state)
+        style = text.style.resolve(text, text.state)
 
         if style.container:
-            self.draw_container(text, style)
+            self.draw_container(text, text.animated)
 
         ctx = self.layer.data.context
         layout = self.layer.data.layout

@@ -1,15 +1,13 @@
 from umbu.components.layout_interface import Layout
 from umbu.render.measurer_interface import IMeasurer
-from umbu.theme.style.interface import Animation, Style
+from umbu.theme.style.interface import Animation, Style, StyleState
 
 from pydantic import Field
 from typing import List
 
 
 class Component:
-    # model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    # id: str = Field(default_factory=lambda: "node_id")
+ 
     x: float = 0.0
     y: float = 0.0
     width: float = 0.0
@@ -37,10 +35,31 @@ class Component:
     active: bool = False
     children: List['Component'] = [] 
 
+    initial_frames = 2
+
 
     def update(self, current_frame):
-        if self.style.animation.text is not None:
-            self.style.animation.text.count(self.total_frames).update(self, current_frame)
+
+        # update the state based on the timeline
+        self.progress = (current_frame/self.total_frames)
+
+        if self.progress == 1:
+            self.state = StyleState.DONE
+            return
+
+        if self.total_frames < self.initial_frames:
+            self.state = StyleState.DONE
+            return
+
+        if current_frame < self.initial_frames:
+            self.state = StyleState.INACTIVE
+
+        if current_frame > self.initial_frames:
+            self.state = StyleState.ACTIVE
+
+        # start animation (if configured)
+        if self.style.animation is not None:
+            self.style.animation.count(self.total_frames).update(self, current_frame)
 
     def transform(self):
 
