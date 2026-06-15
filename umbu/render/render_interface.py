@@ -13,5 +13,5 @@ class IRender(ABC):
         pass
 
     @abstractmethod
-    def draw_text(self, text: Text):
+    def draw(self, text: Text):
         pass

@@ -95,11 +95,8 @@ class CairoRenderer(IRender):
 
         ctx.restore()
 
-    def draw_container(self, text, style):
-
-        ctx = self.layer.data.context
-        layout = self.layer.data.layout
-        
+    def draw_container(self, text, style, ctx, layout):
+     
         ctx.save()
 
         radius = style.container.border_radius
@@ -192,16 +189,36 @@ class CairoRenderer(IRender):
         ctx.restore()
 
 
-    def draw_text(self, text: Text):
+    def draw_text(self, cords, text, font, style, ctx, layout, scale_factor):
+        x, y = cords
+
+        ctx.move_to(x, y)
+
+        layout.set_font_description(font)
+        layout.set_text(text.content, -1)
+
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
+
+        ctx.set_source_rgba(*self._hex_to_rgb(style.text.color, style.text.opacity))
+        ctx.fill()
+
+
+    def draw(self, text: Text):
 
         scale_factor = text.style.scale_factor
         style = text.style.resolve(text, text.state)
 
-        if style.container:
-            self.draw_container(text, text.animated)
-
         ctx = self.layer.data.context
         layout = self.layer.data.layout
+
+        if style.container:
+            self.draw_container(
+                text=text, 
+                style=text.animated,
+                ctx=ctx,
+                layout=layout
+            )
 
         font = self.font.get_font_description(style.text, text.style.scale_factor) 
 
@@ -230,15 +247,12 @@ class CairoRenderer(IRender):
             )
             return
 
-        # Draw the text itself
-        ctx.move_to(x, y)
-
-        layout.set_font_description(font)
-        layout.set_text(text.content, -1)
-
-        PangoCairo.update_layout(ctx, layout)
-        PangoCairo.show_layout(ctx, layout)
-        # End
-
-        ctx.set_source_rgba(*self._hex_to_rgb(style.text.color, style.text.opacity))
-        ctx.fill()
+        self.draw_text(
+            font=font,
+            cords=(x,y),
+            text=text, 
+            style=style,
+            ctx=ctx, 
+            layout=layout,
+            scale_factor=scale_factor 
+        )

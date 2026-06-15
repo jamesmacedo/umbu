@@ -43,4 +43,4 @@ class Text(Component):
         self.layout.arrange(self)
 
     def draw(self, renderer: 'IRender'):
-        renderer.draw_text(self)
+        renderer.draw(self)
