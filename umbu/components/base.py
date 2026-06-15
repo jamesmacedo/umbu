@@ -18,11 +18,6 @@ class Component:
 
     total_frames: int = 0
 
-    opacity: float = 1.0
-    scale: float = 1.0
-    offset_x: float = 0.0
-    offset_y: float = 0.0
-
     world_x: float = 0
     world_y: float = 0
 

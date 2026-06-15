@@ -27,7 +27,7 @@ class CairoMeasurer(IMeasurer):
     def measure(self, component: Text):
         style = component.style.resolve(component, StyleState.ACTIVE)
 
-        font = self.font.get_font_description(style.text, component.scale)
+        font = self.font.get_font_description(style.text)
 
         self.buffer.data.layout.set_text(component.content, -1)
         self.buffer.data.layout.set_font_description(font)
@@ -170,11 +170,13 @@ class CairoRenderer(IRender):
         ctx = self.layer.data.context
         layout = self.layer.data.layout
 
-        font = self.font.get_font_description(style.text, text.scale)
+        font = self.font.get_font_description(style.text) 
 
+        x, y = text.world_x, text.world_y
+        
         if style.text.shadow:
             ctx.save()
-            ctx.move_to(text.world_x + style.text.shadow.offset_x, text.world_y + style.text.shadow.offset_y)
+            ctx.move_to(x + style.text.shadow.offset_x, y + style.text.shadow.offset_y)
 
             layout.set_font_description(font)
             layout.set_text(text.content, -1)
@@ -184,7 +186,7 @@ class CairoRenderer(IRender):
             PangoCairo.show_layout(ctx, layout)
             ctx.restore()
 
-        ctx.move_to(text.world_x, text.world_y)
+        ctx.move_to(x, y)
 
         layout.set_font_description(font)
         layout.set_text(text.content, -1)

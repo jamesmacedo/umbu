@@ -101,6 +101,7 @@ class ShadowStyle:
 class TextStyle:
     font_family: str = "Montserrat"
     font_size: float = 40.0
+    scale: float = 1.0
 
     color: str = "#00FF00"
     weight: str = "bold"
