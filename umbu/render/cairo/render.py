@@ -43,11 +43,11 @@ class CairoRenderer(IRender):
     buffer: Layer
     fonts: dict = {}
 
-    def __init__(self):
+    def __init__(self, width, height):
         self.font = FontCache()
 
-        self.buffer = Layer("BUFFER")
-        self.layer = Layer("COMPOSER")
+        self.buffer = Layer("BUFFER", width, height)
+        self.layer = Layer("COMPOSER", width, height)
         self.measurer = CairoMeasurer(self.buffer)
 
     # def _hex_to_rgba(self, hex_color: str):

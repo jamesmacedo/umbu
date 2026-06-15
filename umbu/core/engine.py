@@ -22,11 +22,18 @@ class Chunk(BaseModel):
     total_frames: int = 0
     words: list[Transcription] = []
 
+class Size(BaseModel):
+    width: int = constants.WIDTH 
+    height: int = constants.HEIGHT
+
 class Engine:
     _transcription: List[Transcription] = []
     total_frames: int = 0
+
+    _FPS: int = constants.FPS 
     animation: Animation
     style: Style 
+    _size: Size
 
     def __init__(self):
         self._chunk_size = constants.CHUNK_SIZE
@@ -62,6 +69,19 @@ class Engine:
     def chunks(self, c):
         self._chunks = c
 
+    def size(self, size: str) -> 'Engine':
+
+        if 'x' not in size:
+            raise ValueError("Please provide the size using the following pattern: 720x1280") 
+
+        w, h = size.split('x') 
+        self._size = Size(width=int(w), height=int(h))
+        return self
+    
+    def fps(self, fps: int) -> 'Engine':
+        self._FPS = int(fps) 
+        return self
+
     def load(self, transcription: List[Dict], style: Style):
 
         self.style = style
@@ -71,7 +91,7 @@ class Engine:
         max_chars_per_chunk = 16
 
         self.total_frames = math.ceil(
-            transcription[-1]['end'] - transcription[0]['start'])*constants.FPS
+            transcription[-1]['end'] - transcription[0]['start'])*self._FPS
 
         def create_chunk(arr: List[Any], size: int) -> List[Chunk]:
             chunks: List[Chunk] = []
@@ -106,21 +126,21 @@ class Engine:
 
             return chunks
 
-        self._transcription = [Transcription(**{'total_frames': math.ceil((d['end'] - d['start'])*constants.FPS)}|d) for d in transcription]
+        self._transcription = [Transcription(**{'total_frames': math.ceil((d['end'] - d['start'])*self._FPS)}|d) for d in transcription]
         self.chunks = create_chunk(self._transcription, self.chunk_size)
         return self
 
     def render_segment(self, row,outfile: str):
 
-        renderer = CairoRenderer()
+        renderer = CairoRenderer(self._size.width, self._size.height)
         renderer.setup(row)
         proc = (
             ffmpeg
             .input('pipe:',
                    format='rawvideo',
                    pix_fmt='bgra',
-                   s=f'{constants.WIDTH}x{constants.HEIGHT}',
-                   r=constants.FPS)
+                   s=f'{self._size.width}x{self._size.height}',
+                   r=self._FPS)
             .output(outfile,
                     # TODO: check the differences between each of these codecs and pix format
                     vcodec='qtrle',  # qtrle
@@ -141,10 +161,6 @@ class Engine:
         proc.stdin.close()
         proc.wait()
 
-    def test(self, component: Component):
-        renderer = CairoRenderer()
-        renderer.render(component)
-
     def run(self, path: str):
 
         if os.path.isdir(path):
@@ -154,6 +170,8 @@ class Engine:
         t_start_chunk = self.chunks[0].words[0].start if self.chunks[0].words else 0
 
         scene = Root(
+            width=self._size.width,
+            height=self._size.height,
             children=[
                 Row(
                     total_frames=chunk.total_frames,
@@ -164,8 +182,8 @@ class Engine:
                             style=self.style,
                             content=item.word,
                             total_frames=item.total_frames,
-                            start_frame=math.ceil((item.start - t_start_chunk) * constants.FPS),
-                            end_frame=math.ceil((item.end - t_start_chunk) * constants.FPS),
+                            start_frame=math.ceil((item.start - t_start_chunk) * self._FPS),
+                            end_frame=math.ceil((item.end - t_start_chunk) * self._FPS),
                         ) for item in chunk.words
                     ]
                 ) for chunk in self.chunks[:3]

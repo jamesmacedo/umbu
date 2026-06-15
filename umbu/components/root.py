@@ -30,7 +30,11 @@ class Root(Component):
 
     layout: Layout = RootLayout()
 
-    def __init__(self, children):
+    def __init__(self, width: int, height: int,  children):
+
+        self.canvas_width = width
+        self.canvas_height = height
+
         for child in children:
             child.parent = self
         self.children = children

@@ -32,9 +32,9 @@ class Layer:
     components: List = []
     locked: bool = False
 
-    def __init__(self, id):
+    def __init__(self, id, width: int, height: int):
         self.id = id
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, constants.WIDTH, constants.HEIGHT)
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
         ctx = cairo.Context(surface)
 
         layout = PangoCairo.create_layout(ctx)
