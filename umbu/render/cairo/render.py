@@ -27,7 +27,7 @@ class CairoMeasurer(IMeasurer):
     def measure(self, component: Text):
         style = component.style.resolve(component, StyleState.ACTIVE)
 
-        font = self.font.get_font_description(style.text)
+        font = self.font.get_font_description(style.text, component.style.scale_factor)
 
         self.buffer.data.layout.set_text(component.content, -1)
         self.buffer.data.layout.set_font_description(font)
@@ -160,8 +160,41 @@ class CairoRenderer(IRender):
 
         ctx.restore()
 
+    def draw_shadow(self, cords, text, font, style, ctx, layout, scale_factor):
+
+        x, y = cords
+
+        ctx.save()
+        ctx.move_to(x + (style.text.shadow.offset_x + scale_factor), y + (style.text.shadow.offset_y * scale_factor))
+
+        layout.set_font_description(font)
+        layout.set_text(text.content, -1)
+
+        ctx.set_source_rgba(*self._hex_to_rgb(style.text.shadow.color, style.text.shadow.opacity))
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
+        ctx.restore()
+
+    def draw_outline(self, cords, text, font, style, ctx, layout, scale_factor):
+        x, y = cords
+        ctx.save()
+        ctx.move_to(x, y)
+
+        layout.set_font_description(font)
+        layout.set_text(text.content, -1)
+
+        ctx.set_source_rgba(*self._hex_to_rgb(style.text.outline_color, style.text.opacity))
+        ctx.set_line_width((style.text.outline_width * scale_factor))
+        PangoCairo.layout_path(ctx, layout) 
+        ctx.stroke_preserve()
+        ctx.set_source_rgba(*self._hex_to_rgb(style.text.color, style.text.opacity))
+        ctx.fill()
+        ctx.restore()
+
+
     def draw_text(self, text: Text):
 
+        scale_factor = text.style.scale_factor
         style = text.style.resolve(text, text.state)
 
         if style.container:
@@ -170,22 +203,34 @@ class CairoRenderer(IRender):
         ctx = self.layer.data.context
         layout = self.layer.data.layout
 
-        font = self.font.get_font_description(style.text) 
+        font = self.font.get_font_description(style.text, text.style.scale_factor) 
 
         x, y = text.world_x, text.world_y
         
         if style.text.shadow:
-            ctx.save()
-            ctx.move_to(x + style.text.shadow.offset_x, y + style.text.shadow.offset_y)
+            self.draw_shadow(
+                font=font,
+                cords=(x,y),
+                text=text, 
+                style=style,
+                ctx=ctx, 
+                layout=layout,
+                scale_factor=scale_factor 
+            )
 
-            layout.set_font_description(font)
-            layout.set_text(text.content, -1)
+        if style.text.outline_width > 0:
+            self.draw_outline(
+                font=font,
+                cords=(x,y),
+                text=text, 
+                style=style,
+                ctx=ctx, 
+                layout=layout,
+                scale_factor=scale_factor 
+            )
+            return
 
-            ctx.set_source_rgba(*self._hex_to_rgb(style.text.shadow.color, style.text.shadow.opacity))
-            PangoCairo.update_layout(ctx, layout)
-            PangoCairo.show_layout(ctx, layout)
-            ctx.restore()
-
+        # Draw the text itself
         ctx.move_to(x, y)
 
         layout.set_font_description(font)
@@ -193,15 +238,7 @@ class CairoRenderer(IRender):
 
         PangoCairo.update_layout(ctx, layout)
         PangoCairo.show_layout(ctx, layout)
-
-        if style.text.outline_width > 0:
-            ctx.set_source_rgba(*self._hex_to_rgb(style.text.outline_color, style.text.opacity))
-            ctx.set_line_width(style.text.outline_width)
-            PangoCairo.layout_path(ctx, layout) 
-            ctx.stroke_preserve()
-            ctx.set_source_rgba(*self._hex_to_rgb(style.text.color, style.text.opacity))
-            ctx.fill()
-            return
+        # End
 
         ctx.set_source_rgba(*self._hex_to_rgb(style.text.color, style.text.opacity))
         ctx.fill()

@@ -5,15 +5,15 @@ minimal_white = Style(
     states={
         StyleState.BASE: StyleData(
             text=TextStyle(
-                font_size=60,
+                font_size=20,
                 weight="bold",
                 color="#FFFFFF",
                 outline_color = "#000000",
-                outline_width = 10.0,
+                outline_width = 7.0,
                 shadow=ShadowStyle(
-                    offset_x = 8,
-                    offset_y = 8,
-                    color = "#000000", # hex with alpha
+                    offset_x = 5,
+                    offset_y = 5,
+                    color = "#000000", # hex without alpha
                 )
             ),
         ), 

@@ -123,9 +123,13 @@ class StyleData:
 @dataclass
 class Style:
     spacing: float = 10
+    scale_factor: float = field(default_factory=int)
 
     states: Dict[StyleState, StyleData] = field(default_factory=dict)
     animation: Animation|None = None 
+
+    def set_factor(self, scale_factor: float):
+        self.scale_factor = scale_factor
 
     def compare(self, default, override):
         if override is None:

@@ -30,6 +30,8 @@ class Engine:
     _transcription: List[Transcription] = []
     total_frames: int = 0
 
+    _scale_factor = 0.5
+
     _FPS: int = constants.FPS 
     animation: Animation
     style: Style 
@@ -76,6 +78,9 @@ class Engine:
 
         w, h = size.split('x') 
         self._size = Size(width=int(w), height=int(h))
+
+        self.style.set_factor(int(h) / constants.V_HEIGHT) 
+
         return self
     
     def fps(self, fps: int) -> 'Engine':
@@ -168,7 +173,7 @@ class Engine:
         os.makedirs(path)
 
         t_start_chunk = self.chunks[0].words[0].start if self.chunks[0].words else 0
-
+        
         scene = Root(
             width=self._size.width,
             height=self._size.height,
