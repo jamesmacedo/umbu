@@ -13,7 +13,7 @@ minimal_white = Style(
                 shadow=ShadowStyle(
                     offset_x = 8,
                     offset_y = 8,
-                    color = "#000000FF" # hex with alpha
+                    color = "#000000", # hex with alpha
                 )
             ),
         ), 

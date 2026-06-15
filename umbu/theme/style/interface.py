@@ -92,7 +92,8 @@ class ContainerStyle:
 class ShadowStyle:
     offset_x: float = 2
     offset_y: float = 2
-    color: str = "#00000000" # hex with alpha
+    color: str = "#000000" # hex without alpha 
+    opacity: float = 1.0 # 0.0 to 1.0
     
     #TODO: implement gaussian blur
     blur: float = 0
@@ -108,7 +109,7 @@ class TextStyle:
 
     outline_color: str = "#FFFFFF"
     outline_width: float = 0.0
-    opacity: float = 1.0
+    opacity: float = 1.0 # 0.0 to 1.0
 
     shadow: ShadowStyle|None = None
 

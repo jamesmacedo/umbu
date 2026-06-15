@@ -50,20 +50,20 @@ class CairoRenderer(IRender):
         self.layer = Layer("COMPOSER")
         self.measurer = CairoMeasurer(self.buffer)
 
-    def _hex_to_rgba(self, hex_color: str):
-        hex_color = hex_color.lstrip('#')
-        r = int(hex_color[0:2], 16) / 255.0
-        g = int(hex_color[2:4], 16) / 255.0
-        b = int(hex_color[4:6], 16) / 255.0
-        a = int(hex_color[6:8], 16) / 255.0
-        return (r, g, b, a)
+    # def _hex_to_rgba(self, hex_color: str):
+    #     hex_color = hex_color.lstrip('#')
+    #     r = int(hex_color[0:2], 16) / 255.0
+    #     g = int(hex_color[2:4], 16) / 255.0
+    #     b = int(hex_color[4:6], 16) / 255.0
+    #     a = int(hex_color[6:8], 16) / 255.0
+    #     return (r, g, b, a)
 
-    def _hex_to_rgb(self, hex_color: str):
+    def _hex_to_rgb(self, hex_color: str, opacity: float = 1.0):
         hex_color = hex_color.lstrip('#')
         r = int(hex_color[0:2], 16) / 255.0
         g = int(hex_color[2:4], 16) / 255.0
         b = int(hex_color[4:6], 16) / 255.0
-        return (r, g, b)
+        return (r, g, b, opacity)
 
     def clear(self):
         self.layer.clear()
@@ -155,7 +155,7 @@ class CairoRenderer(IRender):
             3 * math.pi / 2
         )
 
-        ctx.set_source_rgb(*self._hex_to_rgb(style.container.color))
+        ctx.set_source_rgba(*self._hex_to_rgb(style.container.color))
         ctx.fill()
 
         ctx.restore()
@@ -181,7 +181,7 @@ class CairoRenderer(IRender):
             layout.set_font_description(font)
             layout.set_text(text.content, -1)
 
-            ctx.set_source_rgba(*self._hex_to_rgba(style.text.shadow.color))
+            ctx.set_source_rgba(*self._hex_to_rgb(style.text.shadow.color, style.text.shadow.opacity))
             PangoCairo.update_layout(ctx, layout)
             PangoCairo.show_layout(ctx, layout)
             ctx.restore()
@@ -195,13 +195,13 @@ class CairoRenderer(IRender):
         PangoCairo.show_layout(ctx, layout)
 
         if style.text.outline_width > 0:
-            ctx.set_source_rgb(*self._hex_to_rgb(style.text.outline_color))
+            ctx.set_source_rgba(*self._hex_to_rgb(style.text.outline_color, style.text.opacity))
             ctx.set_line_width(style.text.outline_width)
             PangoCairo.layout_path(ctx, layout) 
             ctx.stroke_preserve()
-            ctx.set_source_rgb(*self._hex_to_rgb(style.text.color))
+            ctx.set_source_rgba(*self._hex_to_rgb(style.text.color, style.text.opacity))
             ctx.fill()
             return
 
-        ctx.set_source_rgb(*self._hex_to_rgb(style.text.color))
+        ctx.set_source_rgba(*self._hex_to_rgb(style.text.color, style.text.opacity))
         ctx.fill()
