@@ -10,13 +10,13 @@ class FontCache:
     def __init__(self):
         self.fonts = {}
 
-    def get_font_description(self, style, scale_factor: float):
+    def get_font_description(self, style, scale: float, scale_factor: float):
 
-        scale = style.scale*scale_factor 
+        s = scale*scale_factor
 
         key = (
             style.font_family,
-            style.font_size * scale,
+            style.font_size,
             style.weight
         )
 
@@ -25,7 +25,7 @@ class FontCache:
 
         desc = Pango.FontDescription()
         desc.set_family(style.font_family)
-        desc.set_size((style.font_size * Pango.SCALE) * scale)
+        desc.set_size((style.font_size * Pango.SCALE) * s)
 
         if style.weight == "bold":
             desc.set_weight(Pango.Weight.BOLD)

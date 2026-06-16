@@ -21,13 +21,13 @@ class Text(Component):
     end_time: float = 0.0
 
     style: Style
-    animated: StyleData
 
     layout: Layout = TextLayout()
 
     state: StyleState = StyleState.INACTIVE
 
     def __init__(self, style: Style, content: str, start_frame, end_frame, total_frames):
+        super().__init__()
 
         self.style = style 
         self. total_frames = total_frames

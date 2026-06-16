@@ -27,7 +27,7 @@ class CairoMeasurer(IMeasurer):
     def measure(self, component: Text):
         style = component.style.resolve(component, StyleState.ACTIVE)
 
-        font = self.font.get_font_description(style.text, component.style.scale_factor)
+        font = self.font.get_font_description(style.text, component.animated.scale, component.style.scale_factor)
 
         self.buffer.data.layout.set_text(component.content, -1)
         self.buffer.data.layout.set_font_description(font)
@@ -72,10 +72,10 @@ class CairoRenderer(IRender):
         component.measure(self.measurer)
         component.set_position(x=(component.parent.canvas_width - component.width)/2, y=component.parent.canvas_height*0.8)
         component.arrange()
+        component.transform()
 
     def render(self, component: Component):
         self.clear()
-        component.transform()
         component.draw(self)
         self.layer.flush()
         return self.layer.data.surface.get_data()
@@ -215,14 +215,14 @@ class CairoRenderer(IRender):
         if style.container:
             self.draw_container(
                 text=text, 
-                style=text.animated,
+                style=text.style,
                 ctx=ctx,
                 layout=layout
             )
 
-        font = self.font.get_font_description(style.text, text.style.scale_factor) 
+        font = self.font.get_font_description(style.text, text.animated.scale, text.style.scale_factor) 
 
-        x, y = text.world_x, text.world_y
+        x, y = text.animated.x, text.animated.y
         
         if style.text.shadow:
             self.draw_shadow(

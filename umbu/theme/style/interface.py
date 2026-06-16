@@ -38,9 +38,34 @@ class Animation(ABC):
         return (current_frame/self.total_frames)
 
     @abstractmethod
-    def update(self, node, current_frame):
+    def on_update(self, node, current_frame):
         pass
 
+    @abstractmethod
+    def on_done(self, node, current_frame):
+        pass
+
+@dataclass
+class AnimationData:
+    scale: float = 1.0
+    x: int = 0
+    y: int = 0
+    progress: float = field(default_factory=float)
+
+    def set_x(self, x: int):
+        self.x = x
+
+    def set_y(self, y: int):
+        self.y = y
+
+    def set_scale(self, scale: int):
+        self.scale = scale
+
+    def set_progress(self, progress: float):
+        self.progress = progress
+
+    def is_done(self):
+        return self.progress == 1
 
 class StyleState(Enum):
     DEFAULT = "default"
@@ -167,11 +192,9 @@ class Style:
         if state_style is None:
             return StyleData(text=TextStyle())
 
-        animated = StyleData(
+        style = StyleData(
             text=self.compare(TextStyle(), state_style.text),
             container=self.compare(ContainerStyle(), state_style.container) if state_style.container != None else None,
         ) 
 
-        component.animated = animated
-
-        return animated
+        return style 

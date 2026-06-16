@@ -3,45 +3,31 @@ from .interface import Animation, ShadowStyle, Style, StyleData, TextStyle, Styl
 
 class ScaleAnimation(Animation):
 
-    def update(self, node, current_frame):
+    def on_update(self, node, current_frame):
 
-        initial_frames = 2
-
-        process = self.get_process(node, current_frame)
-
-        if process == 1:
-            node.state = StyleState.DONE
-            return
-
-        if node.total_frames < initial_frames:
-            node.state = StyleState.DONE
-            return
-
-        if current_frame < initial_frames:
-            node.state = StyleState.INACTIVE
-
-        if current_frame > initial_frames:
-            node.state = StyleState.ACTIVE
+        offset_y = 5
 
         if node.state != StyleState.DONE:
-            factor = self.ease_out_bounce(
-                self.get_process(node, current_frame))
-            node.text.scale = factor
+            factor = self.ease_out_bounce(self.get_process(node, current_frame))
+            node.animated.set_y(node.world_y + (offset_y * factor))
+
+    def on_done(self, node, current_frame):
+        node.world_y = node.animated.y
 
 scale = Style(
     spacing=20,
     states={
         StyleState.BASE: StyleData(
             text=TextStyle(
-                font_size=60,
+                font_size=20,
                 weight="bold",
                 color="#FFFFFF",
                 outline_color = "#000000",
-                outline_width = 10.0,
+                outline_width = 7.0,
                 shadow=ShadowStyle(
-                    offset_x = 8,
-                    offset_y = 8,
-                    color = "#000000FF" # hex with alpha
+                    offset_x = 5,
+                    offset_y = 5,
+                    color = "#000000", # hex without alpha
                 )
             ),
         ), 

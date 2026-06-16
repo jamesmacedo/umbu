@@ -2,7 +2,7 @@ import click
 import json
 from umbu.core.engine import Engine
 from umbu.core.transcriber import Transcriber
-from umbu.theme.style import minimal_yellow, minimal_white 
+from umbu.theme.style import minimal_yellow, minimal_white, scale
 
 
 @click.command()
@@ -21,7 +21,7 @@ def run(input_file: str, size: str, fps: int):
     with open("output/saida.json") as f:
         engine = Engine()
 
-        engine.load(json.load(f), style=minimal_yellow)
+        engine.load(json.load(f), style=scale)
 
         if(size):
             engine.size(size)
