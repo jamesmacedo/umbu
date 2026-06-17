@@ -2,7 +2,6 @@ from .base import ShadowStyle, Style, StyleData, TextStyle, StyleState
 
 
 minimal_white = Style(
-    spacing=20,
     states={
         StyleState.BASE: StyleData(
             text=TextStyle(

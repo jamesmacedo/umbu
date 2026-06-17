@@ -12,7 +12,6 @@ class ScaleAnimation(Animation):
         pass
 
 scale = Style(
-    spacing=20,
     states={
         StyleState.BASE: StyleData(
             text=TextStyle(

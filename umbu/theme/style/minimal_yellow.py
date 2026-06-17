@@ -2,7 +2,6 @@ from .base import Animation, ShadowStyle, Style, StyleData, TextStyle, StyleStat
 
 
 minimal_yellow = Style(
-    spacing=20,
     states={
         StyleState.BASE: StyleData(
             text=TextStyle(

@@ -147,7 +147,7 @@ class StyleData:
 
 @dataclass
 class Style:
-    spacing: float = 10
+    hide_inactive: bool = False 
     scale_factor: float = field(default_factory=int)
 
     states: Dict[StyleState, StyleData] = field(default_factory=dict)

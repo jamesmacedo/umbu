@@ -206,6 +206,9 @@ class CairoRenderer(IRender):
 
     def draw(self, text: Text):
 
+        if text.state == StyleState.INACTIVE and text.style and text.style.hide_inactive:
+            return
+
         scale_factor = text.style.scale_factor
         style = text.style.resolve(text, text.state)
 

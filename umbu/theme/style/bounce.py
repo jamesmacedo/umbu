@@ -5,7 +5,7 @@ class BounceAnimation(Animation):
 
     def on_update(self, node, current_frame):
 
-        offset_y = 5
+        offset_y = 15
 
         if node.state != StyleState.DONE:
             factor = self.ease_out_bounce(self.get_process(node, current_frame))
@@ -14,8 +14,8 @@ class BounceAnimation(Animation):
     def on_done(self, node, current_frame):
         node.world_y = node.animated.y
 
-scale = Style(
-    spacing=20,
+bounce = Style(
+    hide_inactive=True,
     states={
         StyleState.BASE: StyleData(
             text=TextStyle(
