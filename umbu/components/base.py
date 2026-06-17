@@ -1,6 +1,6 @@
 from umbu.components.layout_interface import Layout
 from umbu.render.measurer_interface import IMeasurer
-from umbu.theme.style.interface import AnimationData, Style, StyleState
+from umbu.theme.style import AnimationData, Style, StyleState
 
 from pydantic import Field
 from typing import List

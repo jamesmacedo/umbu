@@ -1,4 +1,5 @@
-from .interface import ShadowStyle, Style, StyleData, TextStyle, StyleState
+from .base import ShadowStyle, Style, StyleData, TextStyle, StyleState
+
 
 minimal_white = Style(
     spacing=20,

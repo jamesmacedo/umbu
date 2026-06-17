@@ -7,7 +7,7 @@ from umbu.components import Row, Text
 from umbu.render.cairo.font import FontCache
 from umbu.render.measurer_interface import IMeasurer
 from umbu.render.render_interface import IRender
-from umbu.theme.style.interface import StyleState
+from umbu.theme.style import StyleState
 from . import Layer
 from typing import List
 

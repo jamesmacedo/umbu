@@ -1,18 +1,15 @@
-from .interface import Animation, ShadowStyle, Style, StyleData, TextStyle, StyleState
+from .base import Animation, ShadowStyle, Style, StyleData, TextStyle, StyleState
 
 
 class ScaleAnimation(Animation):
 
     def on_update(self, node, current_frame):
-
-        offset_y = 5
-
         if node.state != StyleState.DONE:
             factor = self.ease_out_bounce(self.get_process(node, current_frame))
-            node.animated.set_y(node.world_y + (offset_y * factor))
+            node.animated.set_scale(factor)
 
     def on_done(self, node, current_frame):
-        node.world_y = node.animated.y
+        pass
 
 scale = Style(
     spacing=20,

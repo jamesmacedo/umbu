@@ -16,7 +16,7 @@ from typing import List, Any, Dict
 
 from umbu.render.cairo.render import CairoRenderer
 from pydantic import BaseModel
-from umbu.theme.style.interface import Style, Animation
+from umbu.theme.style import Style, Animation
 
 class Chunk(BaseModel):
     total_frames: int = 0

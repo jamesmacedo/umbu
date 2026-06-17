@@ -1,4 +1,4 @@
-from .interface import Animation, ShadowStyle, Style, StyleData, TextStyle, StyleState
+from .base import Animation, ShadowStyle, Style, StyleData, TextStyle, StyleState
 
 
 class BounceAnimation(Animation):

@@ -2,7 +2,7 @@ from umbu.components.layout_interface import Layout
 from pydantic import Field
 
 from umbu.render.measurer_interface import IMeasurer
-from umbu.theme.style.interface import Animation
+from umbu.theme.style import Animation
 
 from .base import Component
 from typing import List

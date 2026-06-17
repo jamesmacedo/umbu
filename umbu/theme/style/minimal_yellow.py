@@ -1,4 +1,5 @@
-from .interface import Animation, ShadowStyle, Style, StyleData, TextStyle, StyleState
+from .base import Animation, ShadowStyle, Style, StyleData, TextStyle, StyleState
+
 
 minimal_yellow = Style(
     spacing=20,

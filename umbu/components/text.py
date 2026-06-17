@@ -1,6 +1,6 @@
 from umbu.components.layout_interface import Layout
 from umbu.render.measurer_interface import IMeasurer
-from umbu.theme.style.interface import Style, StyleData, StyleState
+from umbu.theme.style import Style, StyleData, StyleState
 from .base import Component
 
 
