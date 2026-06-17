@@ -3,7 +3,7 @@
 (B) Implement the dynamic word break for long sentences @core +umbu
 (C) Add the docker support for easy video overlay production @docker +umbu
 (B) Implement the overlaying system to produce the video after the caption generation @video +umbu
-(B) Fix the scaling position while the animation process @animation +umbu
+x 2026-06-17 2026-06-17 Fix the scaling position while the animation process @animation +umbu
 x 2026-06-16 2026-06-16 Implement a method to not show the inactive words while animating @animation +umbu
 x 2026-06-16 2026-06-16 Implement the StyleState hierarchy system to check if there is any other state besides the StyleState.BASE @core +umbu
 (B) Implement the animated container behind the currently activated word @animation +umbu

@@ -21,7 +21,7 @@ def run(input_file: str, size: str, fps: int):
     with open("output/saida.json") as f:
         engine = Engine()
 
-        engine.load(json.load(f), style=bounce)
+        engine.load(json.load(f), style=scale)
 
         if(size):
             engine.size(size)

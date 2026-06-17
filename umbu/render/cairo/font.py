@@ -16,7 +16,7 @@ class FontCache:
 
         key = (
             style.font_family,
-            style.font_size,
+            style.font_size * s,
             style.weight
         )
 

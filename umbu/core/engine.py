@@ -156,10 +156,11 @@ class Engine:
         )
 
         # for i in range(row.start_frame, row.end_frame + 1):
+        renderer.setup(row)
+
         for text in row.children: 
             for j in range(text.total_frames + 1):
                 proc.stdin.write(renderer.render(row))
-                renderer.setup(row)
                 text.update(j)
             # row.update(i)
 

@@ -225,7 +225,7 @@ class CairoRenderer(IRender):
 
         font = self.font.get_font_description(style.text, text.animated.scale, text.style.scale_factor) 
 
-        x, y = text.animated.x, text.animated.y
+        x, y = text.animated.x - ((text.width * text.animated.scale)-text.width)/2, text.animated.y - ((text.height * text.animated.scale)-text.height)/2
         
         if style.text.shadow:
             self.draw_shadow(

@@ -12,6 +12,7 @@ class ScaleAnimation(Animation):
         pass
 
 scale = Style(
+    hide_inactive=True,
     states={
         StyleState.BASE: StyleData(
             text=TextStyle(

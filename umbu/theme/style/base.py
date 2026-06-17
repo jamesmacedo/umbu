@@ -58,7 +58,7 @@ class AnimationData:
     def set_y(self, y: int):
         self.y = y
 
-    def set_scale(self, scale: int):
+    def set_scale(self, scale: float):
         self.scale = scale
 
     def set_progress(self, progress: float):
@@ -82,8 +82,6 @@ class ContainerStyle:
 
     width: float = 1.0 # percentage 0.0 to 1.0
     height: float = 1.0 # percentage 0.0 to 1.0
-
-    scale: float = 1.0
 
     x: float = 0 
     y: float = 0 
@@ -127,7 +125,6 @@ class ShadowStyle:
 class TextStyle:
     font_family: str = "Montserrat"
     font_size: float = 40.0
-    scale: float = 1.0
 
     color: str = "#00FF00"
     weight: str = "bold"
