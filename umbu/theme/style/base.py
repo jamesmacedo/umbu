@@ -184,13 +184,10 @@ class Style:
 
     def resolve(self, component: 'Text', state: StyleState) -> StyleData:
 
-        if StyleState.BASE in self.states:
-            state_style = self.states.get(StyleState.BASE)
-        else: 
-            state_style = self.states.get(state)
+        state_style = self.states.get(state)
 
-        if state_style is None:
-            return StyleData(text=TextStyle())
+        if state_style is None and StyleState.BASE in self.states:
+            state_style = self.states.get(StyleState.BASE)
 
         style = StyleData(
             text=self.compare(TextStyle(), state_style.text),
